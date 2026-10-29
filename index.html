@@ -68,7 +68,6 @@
       <!-- Player Card -->
       <div class="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-amber-500/40 rounded-2xl p-6 relative overflow-hidden shadow-2xl">
         
-        <!-- Top bar with Lot info and Live Timer -->
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div class="flex items-center gap-2">
             <span id="lotNumberBadge" class="bg-amber-500 text-black font-teko text-xl font-bold px-3 py-0.5 rounded uppercase">LOT #1</span>
@@ -76,7 +75,7 @@
           </div>
 
           <!-- Synchronized Countdown Clock -->
-          <div id="timerContainer" class="flex items-center gap-2 px-3 py-1 bg-slate-900 border border-slate-700 rounded-xl">
+          <div id="timerContainer" class="flex items-center gap-2 px-3 py-1 bg-slate-900 border border-slate-700 rounded-xl transition-all">
             <i id="timerIcon" class="fa-regular fa-clock text-amber-400 text-sm"></i>
             <span id="timerText" class="font-teko text-2xl font-bold tracking-wider text-amber-400">20s</span>
             <span id="timerSubtext" class="text-[10px] uppercase font-bold text-slate-400">Time Left</span>
@@ -135,7 +134,7 @@
       <div id="adminConsole" class="hidden bg-slate-900 border-2 border-rose-500/40 rounded-2xl p-6 shadow-2xl">
         <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
           <span class="px-2 py-0.5 rounded text-xs font-bold bg-rose-500 text-white uppercase">Auctioneer Desk</span>
-          <span class="text-xs text-slate-400 font-mono">Master Commands</span>
+          <span class="text-xs text-emerald-400 font-mono font-bold">Auto-Hammer Enabled</span>
         </div>
 
         <!-- Timer Controls for Auctioneer -->
@@ -289,9 +288,6 @@
   </div>
 
   <script>
-    // ==========================================
-    // PRE-CONFIGURED WITH YOUR FIREBASE APP KEYS
-    // ==========================================
     const firebaseConfig = {
       apiKey: "AIzaSyDg6DA9lCKT2vMrKuTKaXdCH7Af2vf12cQ",
       authDomain: "cricket-auction-81958.firebaseapp.com",
@@ -303,10 +299,19 @@
       measurementId: "G-8VMLF61WCZ"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const auctionRef = db.ref("auction_state");
+
+    // Server time offset tracker
+    let serverTimeOffset = 0;
+    db.ref(".info/serverTimeOffset").on("value", (snap) => {
+      serverTimeOffset = snap.val() || 0;
+    });
+
+    function getSyncedNow() {
+      return Date.now() + serverTimeOffset;
+    }
 
     const INITIAL_PLAYERS = [
       { id: 1, name: "Virat Kohli", role: "Top-Order Batter", icon: "fa-baseball-bat-ball", country: "India", basePrice: 2, specialty: "Anchor batter with elite chasing record." },
@@ -348,13 +353,14 @@
     ];
 
     function getDefaultState() {
+      const now = Date.now();
       return {
         currentLotIndex: 0,
         currentBid: 2,
         leadingTeam: null,
         lastAction: "INIT",
         timerDuration: 20,
-        timerEndsAt: Date.now() + 20000,
+        timerEndsAt: now + 20000,
         timerIsPaused: false,
         timerRemainingPaused: 20000,
         players: INITIAL_PLAYERS,
@@ -367,16 +373,17 @@
       };
     }
 
-    let appState = getDefaultState();
+    let appState = null;
     let currentRole = "spectator";
     let lastHandledActionTime = 0;
-    let lastBuzzerLotIndex = -1;
     let lastSecondTickPlayed = -1;
+    let isAutoResolving = false;
 
     // Web Audio Synthesizer
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playTone(freq, type, duration, gainLevel = 0.2) {
       try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = type;
@@ -442,12 +449,14 @@
       if (!appState.teams.team3.squad) appState.teams.team3.squad = [];
       if (!appState.logs) appState.logs = [];
 
+      isAutoResolving = false;
       renderUI();
     });
 
     function saveState(actionType, logMsg) {
+      if (!appState) return;
       appState.lastAction = actionType;
-      appState.actionTime = Date.now();
+      appState.actionTime = getSyncedNow();
       if (logMsg) {
         if (!appState.logs) appState.logs = [];
         appState.logs.unshift(`[${new Date().toLocaleTimeString()}] ${logMsg}`);
@@ -456,7 +465,7 @@
       auctionRef.set(appState);
     }
 
-    // --- High-Precision Synchronized Timer Engine ---
+    // --- Precise Server-Synced Timer & Auto-Hammer Engine ---
     setInterval(() => {
       if (!appState || !appState.players || appState.currentLotIndex >= appState.players.length) return;
 
@@ -474,7 +483,7 @@
         timerText.className = "font-teko text-2xl font-bold tracking-wider text-amber-300";
         timerIcon.className = "fa-solid fa-pause text-amber-400 text-sm";
       } else {
-        const now = Date.now();
+        const now = getSyncedNow();
         remainingMs = Math.max(0, (appState.timerEndsAt || now) - now);
         timerSubtext.textContent = "TIME LEFT";
         timerIcon.className = "fa-regular fa-clock text-sm";
@@ -484,11 +493,19 @@
         if (secondsLeft <= 0) {
           timerContainer.className = "flex items-center gap-2 px-3 py-1 bg-rose-950 border-2 border-rose-600 rounded-xl";
           timerText.className = "font-teko text-2xl font-bold tracking-wider text-rose-400";
-          timerSubtext.textContent = "HAMMER PENDING";
+          timerSubtext.textContent = "HAMMER DROPPING";
 
-          if (lastBuzzerLotIndex !== appState.currentLotIndex) {
-            lastBuzzerLotIndex = appState.currentLotIndex;
+          // Auto-sell logic executed exclusively by the Auctioneer host
+          if (currentRole === 'admin' && !isAutoResolving) {
+            isAutoResolving = true;
             soundBuzzer();
+            setTimeout(() => {
+              if (appState.leadingTeam) {
+                handleHammerSold();
+              } else {
+                handleMarkUnsold();
+              }
+            }, 600);
           }
         } else if (secondsLeft <= 5) {
           timerContainer.className = "flex items-center gap-2 px-3 py-1 bg-rose-950/60 border border-rose-500 rounded-xl urgent-timer";
@@ -509,25 +526,22 @@
       const displaySeconds = Math.max(0, Math.ceil(remainingMs / 1000));
       timerText.textContent = `${displaySeconds}s`;
 
-      // Update Pause button text on Admin Desk
       const pauseBtn = document.getElementById("timerPauseBtn");
       if (pauseBtn) {
         pauseBtn.innerHTML = appState.timerIsPaused 
           ? `<i class="fa-solid fa-play mr-1"></i> Resume` 
           : `<i class="fa-solid fa-pause mr-1"></i> Pause`;
       }
-    }, 250);
+    }, 200);
 
-    // --- Auctioneer Timer Actions ---
+    // --- Auctioneer Timer Controls ---
     function handleTimerTogglePause() {
-      if (currentRole !== 'admin') return;
-      const now = Date.now();
+      if (currentRole !== 'admin' || !appState) return;
+      const now = getSyncedNow();
       if (appState.timerIsPaused) {
-        // Resume
         appState.timerIsPaused = false;
         appState.timerEndsAt = now + (appState.timerRemainingPaused || 15000);
       } else {
-        // Pause
         appState.timerIsPaused = true;
         appState.timerRemainingPaused = Math.max(0, (appState.timerEndsAt || now) - now);
       }
@@ -535,8 +549,8 @@
     }
 
     function handleTimerAddBonus(bonusSeconds) {
-      if (currentRole !== 'admin') return;
-      const now = Date.now();
+      if (currentRole !== 'admin' || !appState) return;
+      const now = getSyncedNow();
       if (appState.timerIsPaused) {
         appState.timerRemainingPaused = (appState.timerRemainingPaused || 0) + (bonusSeconds * 1000);
       } else {
@@ -547,14 +561,15 @@
     }
 
     function handleTimerReset(seconds = 20) {
-      if (currentRole !== 'admin') return;
-      const now = Date.now();
+      if (currentRole !== 'admin' || !appState) return;
+      const now = getSyncedNow();
       appState.timerIsPaused = false;
       appState.timerEndsAt = now + (seconds * 1000);
       saveState("TIMER_RESET", `Timer reset to ${seconds}s.`);
     }
 
     function calculateMaxLegalBid(teamKey) {
+      if (!appState) return 0;
       const team = appState.teams[teamKey];
       const squadCount = (team.squad || []).length;
       const futureSlots = Math.max(0, 12 - (squadCount + 1));
@@ -563,6 +578,7 @@
     }
 
     function placeBidForTeam(teamKey) {
+      if (!appState) return;
       const player = appState.players[appState.currentLotIndex];
       if (!player) return;
 
@@ -575,8 +591,8 @@
       appState.currentBid = nextBid;
       appState.leadingTeam = teamKey;
 
-      // Smart Timer Logic: Reset to 15s; if under 5s, extend by anti-snipe buffer
-      const now = Date.now();
+      // Smart anti-snipe extension
+      const now = getSyncedNow();
       const currentRemaining = Math.max(0, (appState.timerEndsAt || now) - now);
       const resetDurationMs = 15000;
       appState.timerEndsAt = Math.max(now + resetDurationMs, now + currentRemaining + 4000);
@@ -595,7 +611,7 @@
     }
 
     function handleHammerSold() {
-      if (currentRole !== 'admin') return;
+      if (currentRole !== 'admin' || !appState) return;
       const player = appState.players[appState.currentLotIndex];
       if (!player || !appState.leadingTeam) return;
 
@@ -610,15 +626,15 @@
       const next = appState.players[appState.currentLotIndex];
       appState.currentBid = next ? next.basePrice : 2;
 
-      // Reset timer to 20s for new lot
-      appState.timerEndsAt = Date.now() + 20000;
+      // 20s for the newly arriving player
+      appState.timerEndsAt = getSyncedNow() + 20000;
       appState.timerIsPaused = false;
 
       saveState("HAMMER", logMsg);
     }
 
     function handleMarkUnsold() {
-      if (currentRole !== 'admin') return;
+      if (currentRole !== 'admin' || !appState) return;
       const player = appState.players[appState.currentLotIndex];
       if (!player) return;
 
@@ -629,8 +645,8 @@
       appState.currentBid = 2;
       appState.leadingTeam = null;
 
-      // Reset timer to 20s for new lot
-      appState.timerEndsAt = Date.now() + 20000;
+      // 20s for the newly arriving player
+      appState.timerEndsAt = getSyncedNow() + 20000;
       appState.timerIsPaused = false;
 
       saveState("UNSOLD", logMsg);
@@ -654,7 +670,8 @@
         captainConsole.classList.add('hidden');
         resetBtn.classList.remove('hidden');
       } else if (['team1', 'team2', 'team3'].includes(currentRole)) {
-        const tName = appState.teams[currentRole].name;
+        const teamNameMap = { team1: "Super Kings", team2: "Royal Challengers", team3: "Mumbai Titans" };
+        const tName = (appState && appState.teams && appState.teams[currentRole]) ? appState.teams[currentRole].name : teamNameMap[currentRole];
         badge.innerHTML = `<i class="fa-solid fa-hand text-amber-400"></i> <span class="text-amber-300">${tName}</span>`;
         adminConsole.classList.add('hidden');
         captainConsole.classList.remove('hidden');
@@ -683,6 +700,7 @@
     }
 
     function renderUI() {
+      if (!appState) return;
       const player = appState.players[appState.currentLotIndex];
       if (!player) {
         document.getElementById('playerName').textContent = "AUCTION CONCLUDED";
@@ -777,7 +795,6 @@
       }
 
       updateRoleUI();
-      renderUI();
     });
   </script>
 </body>
