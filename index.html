@@ -16,6 +16,13 @@
     @import url('https://fonts.googleapis.com/css2?family=Teko:wght@400;600;700&family=Inter:wght@400;500;700;900&display=swap');
     .font-teko { font-family: 'Teko', sans-serif; }
     .font-sans { font-family: 'Inter', sans-serif; }
+    @keyframes urgentPulse {
+      0%, 100% { border-color: rgba(239, 68, 68, 1); box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); }
+      50% { border-color: rgba(239, 68, 68, 0.3); box-shadow: 0 0 5px rgba(239, 68, 68, 0.1); }
+    }
+    .urgent-timer {
+      animation: urgentPulse 0.8s infinite;
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
@@ -60,9 +67,20 @@
       
       <!-- Player Card -->
       <div class="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-amber-500/40 rounded-2xl p-6 relative overflow-hidden shadow-2xl">
+        
+        <!-- Top bar with Lot info and Live Timer -->
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <span id="lotNumberBadge" class="bg-amber-500 text-black font-teko text-xl font-bold px-3 py-0.5 rounded uppercase">LOT #1</span>
-          <span id="playerRoleBadge" class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-sky-500/20 text-sky-400 border border-sky-500/30">Top-Order Batter</span>
+          <div class="flex items-center gap-2">
+            <span id="lotNumberBadge" class="bg-amber-500 text-black font-teko text-xl font-bold px-3 py-0.5 rounded uppercase">LOT #1</span>
+            <span id="playerRoleBadge" class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-sky-500/20 text-sky-400 border border-sky-500/30">Top-Order Batter</span>
+          </div>
+
+          <!-- Synchronized Countdown Clock -->
+          <div id="timerContainer" class="flex items-center gap-2 px-3 py-1 bg-slate-900 border border-slate-700 rounded-xl">
+            <i id="timerIcon" class="fa-regular fa-clock text-amber-400 text-sm"></i>
+            <span id="timerText" class="font-teko text-2xl font-bold tracking-wider text-amber-400">20s</span>
+            <span id="timerSubtext" class="text-[10px] uppercase font-bold text-slate-400">Time Left</span>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
@@ -115,9 +133,25 @@
 
       <!-- Admin Desk -->
       <div id="adminConsole" class="hidden bg-slate-900 border-2 border-rose-500/40 rounded-2xl p-6 shadow-2xl">
-        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+        <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
           <span class="px-2 py-0.5 rounded text-xs font-bold bg-rose-500 text-white uppercase">Auctioneer Desk</span>
-          <span class="text-xs text-slate-400 font-mono">Full Control</span>
+          <span class="text-xs text-slate-400 font-mono">Master Commands</span>
+        </div>
+
+        <!-- Timer Controls for Auctioneer -->
+        <div class="mb-4 p-3 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-between gap-2">
+          <span class="text-xs font-bold text-slate-400 uppercase">Clock Controls:</span>
+          <div class="flex gap-2">
+            <button onclick="handleTimerTogglePause()" id="timerPauseBtn" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs font-bold">
+              <i class="fa-solid fa-pause mr-1"></i> Pause
+            </button>
+            <button onclick="handleTimerAddBonus(10)" class="px-3 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 rounded text-xs font-bold">
+              +10s Bonus
+            </button>
+            <button onclick="handleTimerReset(20)" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs font-bold">
+              Reset (20s)
+            </button>
+          </div>
         </div>
 
         <div class="grid grid-cols-3 gap-3 mb-5">
@@ -319,6 +353,10 @@
         currentBid: 2,
         leadingTeam: null,
         lastAction: "INIT",
+        timerDuration: 20,
+        timerEndsAt: Date.now() + 20000,
+        timerIsPaused: false,
+        timerRemainingPaused: 20000,
         players: INITIAL_PLAYERS,
         teams: {
           team1: { name: "Super Kings", purse: 100, squad: [] },
@@ -332,16 +370,18 @@
     let appState = getDefaultState();
     let currentRole = "spectator";
     let lastHandledActionTime = 0;
+    let lastBuzzerLotIndex = -1;
+    let lastSecondTickPlayed = -1;
 
     // Web Audio Synthesizer
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playTone(freq, type, duration) {
+    function playTone(freq, type, duration, gainLevel = 0.2) {
       try {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = type;
         osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainLevel, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
@@ -358,6 +398,11 @@
     function soundUnsold() {
       playTone(200, 'sawtooth', 0.25);
       setTimeout(() => playTone(150, 'sawtooth', 0.3), 150);
+    }
+    function soundTick() { playTone(600, 'sine', 0.05, 0.1); }
+    function soundBuzzer() {
+      playTone(220, 'sawtooth', 0.5, 0.25);
+      setTimeout(() => playTone(180, 'sawtooth', 0.5, 0.25), 150);
     }
 
     // --- Firebase Sync Engine ---
@@ -411,6 +456,104 @@
       auctionRef.set(appState);
     }
 
+    // --- High-Precision Synchronized Timer Engine ---
+    setInterval(() => {
+      if (!appState || !appState.players || appState.currentLotIndex >= appState.players.length) return;
+
+      const timerContainer = document.getElementById("timerContainer");
+      const timerText = document.getElementById("timerText");
+      const timerSubtext = document.getElementById("timerSubtext");
+      const timerIcon = document.getElementById("timerIcon");
+
+      let remainingMs = 0;
+
+      if (appState.timerIsPaused) {
+        remainingMs = appState.timerRemainingPaused || 0;
+        timerSubtext.textContent = "PAUSED";
+        timerContainer.className = "flex items-center gap-2 px-3 py-1 bg-amber-950/40 border border-amber-500 rounded-xl";
+        timerText.className = "font-teko text-2xl font-bold tracking-wider text-amber-300";
+        timerIcon.className = "fa-solid fa-pause text-amber-400 text-sm";
+      } else {
+        const now = Date.now();
+        remainingMs = Math.max(0, (appState.timerEndsAt || now) - now);
+        timerSubtext.textContent = "TIME LEFT";
+        timerIcon.className = "fa-regular fa-clock text-sm";
+
+        const secondsLeft = Math.ceil(remainingMs / 1000);
+
+        if (secondsLeft <= 0) {
+          timerContainer.className = "flex items-center gap-2 px-3 py-1 bg-rose-950 border-2 border-rose-600 rounded-xl";
+          timerText.className = "font-teko text-2xl font-bold tracking-wider text-rose-400";
+          timerSubtext.textContent = "HAMMER PENDING";
+
+          if (lastBuzzerLotIndex !== appState.currentLotIndex) {
+            lastBuzzerLotIndex = appState.currentLotIndex;
+            soundBuzzer();
+          }
+        } else if (secondsLeft <= 5) {
+          timerContainer.className = "flex items-center gap-2 px-3 py-1 bg-rose-950/60 border border-rose-500 rounded-xl urgent-timer";
+          timerText.className = "font-teko text-2xl font-bold tracking-wider text-rose-400";
+          timerIcon.className = "fa-solid fa-bell text-rose-400 text-sm animate-bounce";
+
+          if (lastSecondTickPlayed !== secondsLeft) {
+            lastSecondTickPlayed = secondsLeft;
+            soundTick();
+          }
+        } else {
+          timerContainer.className = "flex items-center gap-2 px-3 py-1 bg-slate-900 border border-slate-700 rounded-xl";
+          timerText.className = "font-teko text-2xl font-bold tracking-wider text-amber-400";
+          timerIcon.className = "fa-regular fa-clock text-amber-400 text-sm";
+        }
+      }
+
+      const displaySeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+      timerText.textContent = `${displaySeconds}s`;
+
+      // Update Pause button text on Admin Desk
+      const pauseBtn = document.getElementById("timerPauseBtn");
+      if (pauseBtn) {
+        pauseBtn.innerHTML = appState.timerIsPaused 
+          ? `<i class="fa-solid fa-play mr-1"></i> Resume` 
+          : `<i class="fa-solid fa-pause mr-1"></i> Pause`;
+      }
+    }, 250);
+
+    // --- Auctioneer Timer Actions ---
+    function handleTimerTogglePause() {
+      if (currentRole !== 'admin') return;
+      const now = Date.now();
+      if (appState.timerIsPaused) {
+        // Resume
+        appState.timerIsPaused = false;
+        appState.timerEndsAt = now + (appState.timerRemainingPaused || 15000);
+      } else {
+        // Pause
+        appState.timerIsPaused = true;
+        appState.timerRemainingPaused = Math.max(0, (appState.timerEndsAt || now) - now);
+      }
+      saveState("TIMER_TOGGLE", null);
+    }
+
+    function handleTimerAddBonus(bonusSeconds) {
+      if (currentRole !== 'admin') return;
+      const now = Date.now();
+      if (appState.timerIsPaused) {
+        appState.timerRemainingPaused = (appState.timerRemainingPaused || 0) + (bonusSeconds * 1000);
+      } else {
+        const currentEnd = Math.max(now, appState.timerEndsAt || now);
+        appState.timerEndsAt = currentEnd + (bonusSeconds * 1000);
+      }
+      saveState("TIMER_BONUS", `Added +${bonusSeconds}s bonus to auction clock.`);
+    }
+
+    function handleTimerReset(seconds = 20) {
+      if (currentRole !== 'admin') return;
+      const now = Date.now();
+      appState.timerIsPaused = false;
+      appState.timerEndsAt = now + (seconds * 1000);
+      saveState("TIMER_RESET", `Timer reset to ${seconds}s.`);
+    }
+
     function calculateMaxLegalBid(teamKey) {
       const team = appState.teams[teamKey];
       const squadCount = (team.squad || []).length;
@@ -431,6 +574,14 @@
 
       appState.currentBid = nextBid;
       appState.leadingTeam = teamKey;
+
+      // Smart Timer Logic: Reset to 15s; if under 5s, extend by anti-snipe buffer
+      const now = Date.now();
+      const currentRemaining = Math.max(0, (appState.timerEndsAt || now) - now);
+      const resetDurationMs = 15000;
+      appState.timerEndsAt = Math.max(now + resetDurationMs, now + currentRemaining + 4000);
+      appState.timerIsPaused = false;
+
       saveState("BID", `Bid raised to ${nextBid} Pts by ${appState.teams[teamKey].name}`);
     }
 
@@ -459,6 +610,10 @@
       const next = appState.players[appState.currentLotIndex];
       appState.currentBid = next ? next.basePrice : 2;
 
+      // Reset timer to 20s for new lot
+      appState.timerEndsAt = Date.now() + 20000;
+      appState.timerIsPaused = false;
+
       saveState("HAMMER", logMsg);
     }
 
@@ -473,6 +628,10 @@
 
       appState.currentBid = 2;
       appState.leadingTeam = null;
+
+      // Reset timer to 20s for new lot
+      appState.timerEndsAt = Date.now() + 20000;
+      appState.timerIsPaused = false;
 
       saveState("UNSOLD", logMsg);
     }
