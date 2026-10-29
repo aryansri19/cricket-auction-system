@@ -6,7 +6,7 @@
   <title>Live Cricket Auction Arena</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <script src="https://unpkg.com/piesocket-js@5"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Teko:wght@400;600;700&family=Inter:wght@400;500;700;900&display=swap');
@@ -27,10 +27,10 @@
           <h1 class="text-base font-bold text-white flex items-center gap-2">
             Live Mega Draft 
             <span id="connStatus" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-rose-500/20 text-rose-400 border border-rose-500/30">
-              <span class="w-1.5 h-1.5 rounded-full bg-rose-400 mr-1.5"></span> Disconnected
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-400 mr-1.5"></span> Connecting...
             </span>
           </h1>
-          <p class="text-[11px] text-slate-400">Purse: 100 Pts | Min Squad: 12 | Base: 2 Pts | Room: <span id="roomLabel" class="font-mono text-amber-400 font-bold">None</span></p>
+          <p class="text-[11px] text-slate-400">Purse: 100 Pts | Min Squad: 12 | Base: 2 Pts | Room: <span id="roomLabel" class="font-mono text-amber-400 font-bold">cric26</span></p>
         </div>
       </div>
 
@@ -42,7 +42,7 @@
           <i class="fa-solid fa-share-nodes"></i> Links
         </button>
         <button onclick="toggleRoomModal(true)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border border-slate-700">
-          <i class="fa-solid fa-tower-broadcast"></i> Connect Room
+          <i class="fa-solid fa-sliders"></i> Role / Room
         </button>
       </div>
     </div>
@@ -51,7 +51,7 @@
   <!-- Main Content -->
   <main class="max-w-7xl mx-auto w-full p-4 lg:p-6 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-    <!-- Left: Lot & Bidding Block (7 Cols) -->
+    <!-- Left: Current Lot & Console (7 Cols) -->
     <div class="lg:col-span-7 flex flex-col gap-6">
       
       <!-- Player Card -->
@@ -96,24 +96,24 @@
         </div>
       </div>
 
-      <!-- Captain Console -->
+      <!-- Captain Console (Hidden on Spectator & Admin) -->
       <div id="captainConsole" class="hidden bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border-2 border-indigo-500/50 rounded-2xl p-6 shadow-2xl flex flex-col items-center justify-center text-center">
         <h3 id="captainConsoleTitle" class="text-lg font-bold text-indigo-300 uppercase tracking-wider mb-1">Captain Console</h3>
         <p id="captainSafetyNotice" class="text-xs text-slate-300 mb-6">
           Your Max Legal Bid is <strong id="captainMaxBidDisplay" class="text-amber-400">78 Pts</strong>.
         </p>
 
-        <button id="raisePaddleBtn" onclick="handleCaptainRaiseBid()" class="w-full max-w-md py-6 px-8 rounded-2xl font-teko text-4xl font-bold uppercase tracking-wider transition bg-gradient-to-b from-emerald-500 to-emerald-700 text-black hover:from-emerald-400 hover:to-emerald-600 shadow-xl">
+        <button id="raisePaddleBtn" onclick="handleCaptainRaiseBid()" class="w-full max-w-md py-6 px-8 rounded-2xl font-teko text-4xl font-bold uppercase tracking-wider transition bg-gradient-to-b from-emerald-500 to-emerald-700 text-black hover:from-emerald-400 hover:to-emerald-600 shadow-xl cursor-pointer active:scale-95">
           <i class="fa-solid fa-hand"></i> Raise Paddle (+1 Pt)
         </button>
         <span id="paddleFeedback" class="text-xs mt-3 text-slate-400 font-medium h-4"></span>
       </div>
 
-      <!-- Admin Desk -->
+      <!-- Auctioneer Desk (Hidden on Captain & Spectator) -->
       <div id="adminConsole" class="hidden bg-slate-900 border-2 border-rose-500/40 rounded-2xl p-6 shadow-2xl">
         <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
           <span class="px-2 py-0.5 rounded text-xs font-bold bg-rose-500 text-white uppercase">Auctioneer Desk</span>
-          <span class="text-xs text-emerald-400 font-mono">Connected Peers: <strong id="peerCountLabel">0</strong></span>
+          <span class="text-xs text-slate-400 font-mono">Cloud Synced</span>
         </div>
 
         <div class="grid grid-cols-3 gap-3 mb-5">
@@ -147,17 +147,17 @@
           <i class="fa-solid fa-clock-rotate-left text-amber-500"></i> Activity Feed
         </h4>
         <div id="biddingLog" class="space-y-1.5 overflow-y-auto max-h-40 text-xs font-mono text-slate-300">
-          <div class="text-slate-500 italic">Waiting for connection...</div>
+          <div class="text-slate-500 italic">Waiting for auction actions...</div>
         </div>
       </div>
 
     </div>
 
-    <!-- Right: 3 Teams Status (5 Cols) -->
+    <!-- Right: Franchise Purses (5 Cols) -->
     <div class="lg:col-span-5 flex flex-col gap-5">
       <h3 class="font-teko text-3xl font-bold uppercase text-white">Franchise Purses</h3>
 
-      <!-- Team Cards -->
+      <!-- Team 1 -->
       <div id="cardTeam1" class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
         <div class="flex items-center justify-between mb-2">
           <div class="flex items-center gap-2">
@@ -176,6 +176,7 @@
         </div>
       </div>
 
+      <!-- Team 2 -->
       <div id="cardTeam2" class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
         <div class="flex items-center justify-between mb-2">
           <div class="flex items-center gap-2">
@@ -194,6 +195,7 @@
         </div>
       </div>
 
+      <!-- Team 3 -->
       <div id="cardTeam3" class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
         <div class="flex items-center justify-between mb-2">
           <div class="flex items-center gap-2">
@@ -216,28 +218,29 @@
   </main>
 
   <!-- Room Modal -->
-  <div id="roomModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div id="roomModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl">
-      <h3 class="font-teko text-3xl font-bold text-white uppercase mb-2">Connect Auction Room</h3>
-      <p class="text-xs text-slate-400 mb-4">Choose a Room Name (e.g. <strong class="text-amber-400">cric26</strong>). The auctioneer and all captains must use the same Room Name.</p>
-      
+      <div class="flex items-center justify-between pb-2 mb-3 border-b border-slate-800">
+        <h3 class="font-teko text-2xl font-bold text-white uppercase">Switch Room or Role</h3>
+        <button onclick="toggleRoomModal(false)" class="text-slate-400 text-lg">&times;</button>
+      </div>
       <div class="space-y-3">
         <div>
-          <label class="text-[11px] font-bold uppercase text-slate-400 block mb-1">Room Name</label>
-          <input id="inputRoomId" type="text" value="cric26" class="w-full bg-slate-950 border border-slate-700 px-3 py-2 rounded-lg text-sm text-white focus:outline-none focus:border-amber-500 font-mono" />
+          <label class="text-[11px] font-bold uppercase text-slate-400 block mb-1">Room Code</label>
+          <input id="inputRoomId" type="text" value="cric26" class="w-full bg-slate-950 border border-slate-700 px-3 py-2 rounded-lg text-sm text-white font-mono" />
         </div>
         <div>
           <label class="text-[11px] font-bold uppercase text-slate-400 block mb-1">Your Role</label>
-          <select id="selectRole" class="w-full bg-slate-950 border border-slate-700 px-3 py-2 rounded-lg text-sm text-white focus:outline-none focus:border-amber-500">
+          <select id="selectRole" class="w-full bg-slate-950 border border-slate-700 px-3 py-2 rounded-lg text-sm text-white">
             <option value="spectator">Spectator (TV Screen)</option>
             <option value="team1">Team 1 Captain (Super Kings)</option>
             <option value="team2">Team 2 Captain (Royal Challengers)</option>
             <option value="team3">Team 3 Captain (Mumbai Titans)</option>
-            <option value="admin">Auctioneer / Admin (Host)</option>
+            <option value="admin">Auctioneer / Admin</option>
           </select>
         </div>
-        <button onclick="startConnection()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold uppercase text-xs rounded-lg mt-2">
-          Join Auction Room
+        <button onclick="saveRoomAndReload()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold uppercase text-xs rounded-lg mt-2">
+          Apply & Connect
         </button>
       </div>
     </div>
@@ -247,22 +250,26 @@
   <div id="shareModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
-        <h3 class="font-teko text-2xl font-bold text-white uppercase">Direct Links for Captains</h3>
+        <h3 class="font-teko text-2xl font-bold text-white uppercase">Share Direct Links</h3>
         <button onclick="toggleShareModal(false)" class="text-slate-400 text-lg">&times;</button>
       </div>
-      <p class="text-xs text-slate-400 mb-3">Share these with your captains. They will auto-connect with their paddle ready.</p>
+      <p class="text-xs text-slate-400 mb-3">Anyone opening these links will automatically connect to this live auction from any phone, laptop, or TV.</p>
       <div class="space-y-2 text-xs">
         <div>
-          <span class="text-blue-400 font-bold block mb-1">Team 1</span>
+          <span class="text-blue-400 font-bold block mb-1">Team 1 Link</span>
           <input id="shareLink1" readonly class="w-full bg-slate-950 border border-slate-800 p-2 rounded text-[11px]" />
         </div>
         <div>
-          <span class="text-amber-400 font-bold block mb-1">Team 2</span>
+          <span class="text-amber-400 font-bold block mb-1">Team 2 Link</span>
           <input id="shareLink2" readonly class="w-full bg-slate-950 border border-slate-800 p-2 rounded text-[11px]" />
         </div>
         <div>
-          <span class="text-emerald-400 font-bold block mb-1">Team 3</span>
+          <span class="text-emerald-400 font-bold block mb-1">Team 3 Link</span>
           <input id="shareLink3" readonly class="w-full bg-slate-950 border border-slate-800 p-2 rounded text-[11px]" />
+        </div>
+        <div>
+          <span class="text-slate-300 font-bold block mb-1">TV / Spectator Screen Link</span>
+          <input id="shareLinkSpec" readonly class="w-full bg-slate-950 border border-slate-800 p-2 rounded text-[11px]" />
         </div>
       </div>
     </div>
@@ -326,9 +333,7 @@
     let appState = getDefaultState();
     let currentRole = "spectator";
     let roomId = "cric26";
-    let peer = null;
-    let connections = []; // For Admin
-    let hostConn = null;  // For Captains/Spectators
+    let channel = null;
 
     // Web Audio Synthesizer
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -357,87 +362,60 @@
       setTimeout(() => playTone(150, 'sawtooth', 0.3), 150);
     }
 
-    // Connect via PeerJS
-    function startConnection() {
-      roomId = document.getElementById('inputRoomId').value.trim().toLowerCase() || "cric26";
-      currentRole = document.getElementById('selectRole').value;
-      document.getElementById('roomModal').classList.add('hidden');
-      document.getElementById('roomLabel').textContent = roomId;
-
-      updateRoleUI();
-      setupShareLinks();
-
-      const hostPeerId = `auction-host-${roomId}`;
-
-      if (currentRole === 'admin') {
-        // Auctioneer acts as Host
-        peer = new Peer(hostPeerId);
-
-        peer.on('open', (id) => {
-          setConnectedStatus(true, "Hosting (Admin)");
+    // PieSocket Public WebSocket Cloud Relay
+    function initPieSocket() {
+      try {
+        const pieSocket = new PieSocket.default({
+          apiKey: "0eQ48K0L7c24a9B5P7z3E4g0d2F9h1J3k5L7m9Q1", // Public demo key
+          clusterId: "free.blr2" // Bangalore / India low-latency cluster
         });
 
-        peer.on('connection', (conn) => {
-          connections.push(conn);
-          updatePeerCount();
+        channel = pieSocket.subscribe(`auction_${roomId}`);
 
-          // Send current state to newly joined client
-          conn.on('open', () => {
-            conn.send({ type: 'SYNC_STATE', state: appState });
-          });
-
-          // Handle incoming bids from Captains
-          conn.on('data', (data) => {
-            if (data.type === 'BID_REQUEST') {
-              placeBidForTeam(data.teamKey);
-            }
-          });
-
-          conn.on('close', () => {
-            connections = connections.filter(c => c !== conn);
-            updatePeerCount();
-          });
-        });
-
-        peer.on('error', (err) => {
-          if (err.type === 'unavailable-id') {
-            alert(`Room '${roomId}' is already being hosted by an Auctioneer. Join as Captain or Spectator, or pick a different room name.`);
-            toggleRoomModal(true);
+        channel.on('open', () => {
+          setConnectedStatus(true, "Cloud Connected");
+          // If we are a spectator or captain joining, ask the admin to sync state
+          if (currentRole !== 'admin') {
+            channel.publish('REQUEST_SYNC', { from: currentRole });
           }
         });
 
-      } else {
-        // Captain or Spectator: Connect to host
-        peer = new Peer();
-
-        peer.on('open', () => {
-          hostConn = peer.connect(hostPeerId, { reliable: true });
-
-          hostConn.on('open', () => {
-            setConnectedStatus(true, "Connected to Host");
-          });
-
-          hostConn.on('data', (data) => {
-            if (data.type === 'SYNC_STATE') {
-              appState = data.state;
-              if (data.action === 'BID') soundBid();
-              if (data.action === 'HAMMER') soundHammer();
-              if (data.action === 'UNSOLD') soundUnsold();
-              renderUI();
-            }
-          });
-
-          hostConn.on('close', () => {
-            setConnectedStatus(false, "Host Disconnected");
-          });
+        channel.on('BID_ACTION', (data) => {
+          appState = data.state;
+          soundBid();
+          renderUI();
         });
 
-        peer.on('error', (err) => {
-          setConnectedStatus(false, "Connection Failed");
+        channel.on('HAMMER_ACTION', (data) => {
+          appState = data.state;
+          soundHammer();
+          confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+          renderUI();
         });
+
+        channel.on('UNSOLD_ACTION', (data) => {
+          appState = data.state;
+          soundUnsold();
+          renderUI();
+        });
+
+        channel.on('SYNC_STATE', (data) => {
+          appState = data.state;
+          renderUI();
+        });
+
+        channel.on('REQUEST_SYNC', () => {
+          if (currentRole === 'admin') {
+            channel.publish('SYNC_STATE', { state: appState });
+          }
+        });
+
+        channel.on('error', () => {
+          setConnectedStatus(false, "Reconnecting...");
+        });
+      } catch (err) {
+        console.error(err);
       }
-
-      renderUI();
     }
 
     function setConnectedStatus(connected, label) {
@@ -448,20 +426,6 @@
       } else {
         el.className = "inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-rose-500/20 text-rose-400 border border-rose-500/30";
         el.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-rose-400 mr-1.5"></span> ${label}`;
-      }
-    }
-
-    function updatePeerCount() {
-      document.getElementById('peerCountLabel').textContent = connections.length;
-    }
-
-    function broadcastState(action = null) {
-      if (currentRole === 'admin') {
-        connections.forEach(conn => {
-          if (conn.open) {
-            conn.send({ type: 'SYNC_STATE', state: appState, action });
-          }
-        });
       }
     }
 
@@ -484,25 +448,26 @@
 
       appState.currentBid = nextBid;
       appState.leadingTeam = teamKey;
-      soundBid();
 
       const logMsg = `Bid raised to ${nextBid} Pts by ${appState.teams[teamKey].name}`;
       appState.logs.unshift(`[${new Date().toLocaleTimeString()}] ${logMsg}`);
       if (appState.logs.length > 30) appState.logs.pop();
 
+      soundBid();
       renderUI();
-      broadcastState('BID');
+
+      if (channel) {
+        channel.publish('BID_ACTION', { state: appState });
+      }
     }
 
     function handleCaptainRaiseBid() {
       if (!['team1', 'team2', 'team3'].includes(currentRole)) return;
-      if (hostConn && hostConn.open) {
-        hostConn.send({ type: 'BID_REQUEST', teamKey: currentRole });
-      }
+      placeBidForTeam(currentRole);
     }
 
     function handleManualBid(teamKey) {
-      if (currentRole === 'admin') placeBidForTeam(teamKey);
+      placeBidForTeam(teamKey);
     }
 
     function handleHammerSold() {
@@ -524,7 +489,10 @@
       appState.currentBid = next ? next.basePrice : 2;
 
       renderUI();
-      broadcastState('HAMMER');
+
+      if (channel) {
+        channel.publish('HAMMER_ACTION', { state: appState });
+      }
     }
 
     function handleMarkUnsold() {
@@ -541,7 +509,10 @@
       appState.leadingTeam = null;
 
       renderUI();
-      broadcastState('UNSOLD');
+
+      if (channel) {
+        channel.publish('UNSOLD_ACTION', { state: appState });
+      }
     }
 
     function updateRoleUI() {
@@ -571,10 +542,27 @@
       document.getElementById('shareLink1').value = `${baseUrl}?room=${roomId}&team=team1`;
       document.getElementById('shareLink2').value = `${baseUrl}?room=${roomId}&team=team2`;
       document.getElementById('shareLink3').value = `${baseUrl}?room=${roomId}&team=team3`;
+      document.getElementById('shareLinkSpec').value = `${baseUrl}?room=${roomId}&role=spectator`;
     }
 
-    function toggleShareModal(show) { document.getElementById('shareModal').classList.toggle('hidden', !show); }
+    function toggleShareModal(show) { 
+      if (show) setupShareLinks();
+      document.getElementById('shareModal').classList.toggle('hidden', !show); 
+    }
     function toggleRoomModal(show) { document.getElementById('roomModal').classList.toggle('hidden', !show); }
+
+    function saveRoomAndReload() {
+      const r = document.getElementById('inputRoomId').value.trim().toLowerCase() || "cric26";
+      const role = document.getElementById('selectRole').value;
+      const baseUrl = window.location.origin + window.location.pathname;
+      if (role === 'admin') {
+        window.location.href = `${baseUrl}?room=${r}&role=admin`;
+      } else if (role === 'spectator') {
+        window.location.href = `${baseUrl}?room=${r}&role=spectator`;
+      } else {
+        window.location.href = `${baseUrl}?room=${r}&team=${role}`;
+      }
+    }
 
     function renderUI() {
       const player = appState.players[appState.currentLotIndex];
@@ -635,7 +623,7 @@
           feedback.textContent = `Must reserve points for 12 players.`;
         } else {
           btn.disabled = false;
-          btn.className = "w-full max-w-md py-6 px-8 rounded-2xl font-teko text-4xl uppercase bg-gradient-to-b from-emerald-500 to-emerald-700 text-black hover:from-emerald-400 cursor-pointer shadow-xl";
+          btn.className = "w-full max-w-md py-6 px-8 rounded-2xl font-teko text-4xl uppercase bg-gradient-to-b from-emerald-500 to-emerald-700 text-black hover:from-emerald-400 cursor-pointer shadow-xl active:scale-95";
           btn.innerHTML = `<i class="fa-solid fa-hand"></i> Raise Paddle (${nextPrice} Pts)`;
           feedback.textContent = "";
         }
@@ -651,7 +639,7 @@
       });
     }
 
-    // Auto-detect room / team from URL parameters
+    // Startup routing
     window.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
       const roomParam = params.get('room');
@@ -659,18 +647,21 @@
       const roleParam = params.get('role');
 
       if (roomParam) {
-        document.getElementById('inputRoomId').value = roomParam;
+        roomId = roomParam;
       }
+      document.getElementById('roomLabel').textContent = roomId;
+
       if (teamParam && ['team1', 'team2', 'team3'].includes(teamParam)) {
-        document.getElementById('selectRole').value = teamParam;
+        currentRole = teamParam;
       } else if (roleParam === 'admin') {
-        document.getElementById('selectRole').value = 'admin';
+        currentRole = 'admin';
+      } else {
+        currentRole = 'spectator';
       }
 
-      // If URL already specifies room and role, auto-connect immediately
-      if (roomParam && (teamParam || roleParam)) {
-        startConnection();
-      }
+      updateRoleUI();
+      renderUI();
+      initPieSocket();
     });
   </script>
 </body>
