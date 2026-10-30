@@ -46,7 +46,7 @@
               <span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5 animate-pulse"></span> Connecting...
             </span>
           </h1>
-          <p class="text-[11px] text-slate-400">Purse: 100 Pts | Min Squad: 8 | Base: 2 Pts | Cloud Synced</p>
+          <p class="text-[11px] text-slate-400">Purse: 100 Pts | Min Squad: 8 | Base: 2 Pts (R1) / 1 Pt (R2) | Cloud Synced</p>
         </div>
       </div>
 
@@ -77,6 +77,7 @@
         <div class="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-amber-500/40 rounded-2xl p-6 relative overflow-hidden shadow-2xl">
           <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div class="flex items-center gap-2">
+              <span id="roundBadge" class="bg-indigo-600 text-white font-teko text-lg font-bold px-2.5 py-0.5 rounded uppercase">ROUND 1</span>
               <span id="lotNumberBadge" class="bg-amber-500 text-black font-teko text-xl font-bold px-3 py-0.5 rounded uppercase">LOT #1</span>
               <span id="playerRoleBadge" class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-sky-500/20 text-sky-400 border border-sky-500/30">Batter</span>
             </div>
@@ -145,7 +146,7 @@
         <div id="adminConsole" class="hidden bg-slate-900 border-2 border-rose-500/40 rounded-2xl p-6 shadow-2xl">
           <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
             <span class="px-2 py-0.5 rounded text-xs font-bold bg-rose-500 text-white uppercase">Auctioneer Desk</span>
-            <span class="text-xs text-emerald-400 font-mono font-bold">Auto-Hammer Enabled</span>
+            <span class="text-xs text-emerald-400 font-mono font-bold">Auto-Hammer Active</span>
           </div>
 
           <!-- Timer Controls for Auctioneer -->
@@ -265,47 +266,51 @@
       </div>
     </div>
 
-    <!-- Splash Screen: Unsold Players Accelerated Round -->
+    <!-- Splash Screen: Round 2 (Accelerated Unsold Players Round) -->
     <div id="unsoldSplashView" class="hidden w-full max-w-3xl mx-auto my-auto bg-slate-900 border-2 border-amber-500 rounded-3xl p-8 text-center shadow-2xl">
       <div class="w-20 h-20 mx-auto rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center text-4xl mb-4">
         <i class="fa-solid fa-rotate"></i>
       </div>
       <h2 class="font-teko text-5xl font-bold uppercase text-white mb-2">Round 1 Completed</h2>
-      <p class="text-sm text-slate-300 max-w-md mx-auto mb-6">
-        Entering the <strong class="text-amber-400">Accelerated Unsold Players Round</strong>. All passed players return to the block for franchise acquisition.
+      <p class="text-sm text-slate-300 max-w-md mx-auto mb-4">
+        Entering the <strong class="text-amber-400">Accelerated Unsold Players Round (Round 2)</strong>.
       </p>
-      <div id="unsoldStatsBadge" class="inline-block px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 text-xs font-mono mb-8">
-        Remaining Unsold Players: <strong id="unsoldPoolCount" class="text-amber-400">0</strong>
+      <div class="inline-block px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold mb-6">
+        Base Price Reduced to 1 Pt for All Players
+      </div>
+      <div id="unsoldStatsBadge" class="block px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 text-xs font-mono mb-8">
+        Returning Unsold Players: <strong id="unsoldPoolCount" class="text-amber-400">0</strong>
       </div>
       <div id="unsoldAdminAction" class="hidden">
         <button onclick="handleCommenceUnsoldRound()" class="px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-teko text-3xl font-bold uppercase rounded-2xl shadow-xl transition active:scale-95">
-          <i class="fa-solid fa-gavel mr-2"></i> Commence Round 2
+          <i class="fa-solid fa-gavel mr-2"></i> Commence Round 2 (1 Pt Base)
         </button>
       </div>
       <div id="unsoldWaitingNote" class="text-xs text-slate-500 italic">Waiting for Auctioneer to resume the hammer...</div>
     </div>
 
-    <!-- Splash Screen: Points Exhausted - Draft Lottery Round -->
+    <!-- Splash Screen: Chit-Picking / Draft Lottery Round (Round 3) -->
     <div id="lotterySplashView" class="hidden w-full max-w-3xl mx-auto my-auto bg-slate-900 border-2 border-purple-500 rounded-3xl p-8 text-center shadow-2xl">
       <div class="w-20 h-20 mx-auto rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/40 flex items-center justify-center text-4xl mb-4">
-        <i class="fa-solid fa-dice"></i>
+        <i class="fa-solid fa-ticket-simple"></i>
       </div>
-      <h2 class="font-teko text-5xl font-bold uppercase text-white mb-2">Points Exhausted</h2>
+      <h2 class="font-teko text-5xl font-bold uppercase text-white mb-2">Chit-Picking Round</h2>
       <p class="text-sm text-slate-300 max-w-md mx-auto mb-6">
-        All team purses are exhausted. Entering the <strong class="text-purple-400">Random Draft Lottery Round</strong> to balance remaining squads at 0 points.
+        Round 2 is complete. Any remaining unsold players are being randomly drafted into franchises at <strong class="text-purple-400">0 Points</strong> via chit picking.
       </p>
       <div id="lotteryCurrentPickBanner" class="p-4 bg-slate-950 border border-slate-800 rounded-2xl mb-8">
-        <span class="text-xs text-slate-400 uppercase font-bold block mb-1">Lottery Status</span>
-        <div id="lotteryDraftText" class="font-teko text-3xl text-purple-300">Ready to Draw</div>
+        <span class="text-xs text-slate-400 uppercase font-bold block mb-1">Chit Pick Status</span>
+        <div id="lotteryDraftText" class="font-teko text-3xl text-purple-300">Ready to Pick Chits</div>
       </div>
       <div id="lotteryAdminAction" class="hidden flex justify-center gap-4">
         <button onclick="handleDraftLotteryStep()" class="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-teko text-2xl font-bold uppercase rounded-xl shadow-lg transition">
-          <i class="fa-solid fa-dice mr-2"></i> Draw Next Player
+          <i class="fa-solid fa-dice mr-2"></i> Pick Next Chit
         </button>
         <button onclick="handleDraftLotteryAuto()" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-purple-300 font-teko text-2xl font-bold uppercase rounded-xl border border-purple-500/30 shadow-lg transition">
-          Auto-Resolve All
+          Auto-Pick All Remaining
         </button>
       </div>
+      <div id="lotteryWaitingNote" class="text-xs text-slate-500 italic">Chits are being drawn by the Auctioneer...</div>
     </div>
 
     <!-- Final Roster Summary View -->
@@ -320,7 +325,7 @@
           <h2 class="font-teko text-5xl font-bold uppercase tracking-wider leading-none mt-1 text-black">
             Auction Concluded • Final Squads
           </h2>
-          <p class="text-xs font-medium text-black/80 mt-1">All lots completed. Download the official roster PDF below.</p>
+          <p class="text-xs font-medium text-black/80 mt-1">All 3 rounds completed. Download the official roster PDF below.</p>
         </div>
         <div class="flex items-center gap-3">
           <button onclick="generateRosterPDF()" class="bg-black hover:bg-slate-900 text-amber-400 px-5 py-3 rounded-xl text-sm font-bold uppercase tracking-wider flex items-center gap-2 shadow-2xl transition border border-amber-400/40">
@@ -455,7 +460,6 @@
     const db = firebase.database();
     const auctionRef = db.ref("auction_state");
 
-    // Server time offset tracker
     let serverTimeOffset = 0;
     db.ref(".info/serverTimeOffset").on("value", (snap) => {
       serverTimeOffset = snap.val() || 0;
@@ -465,7 +469,6 @@
       return Date.now() + serverTimeOffset;
     }
 
-    // Direct Google Drive direct image URL transformer
     function formatDrivePhotoUrl(rawUrl) {
       if (!rawUrl) return '';
       const match = rawUrl.match(/[-\w]{25,}/);
@@ -473,7 +476,7 @@
       return `https://lh3.googleusercontent.com/d/${match[0]}=w800`;
     }
 
-    // PLAYERS PARSED FROM GOOGLE SHEET
+    // INITIAL 24 PLAYERS FROM SPREADSHEET (ROUND 1 BASE PRICE = 2)
     const INITIAL_PLAYERS = [
       { id: 1, name: "Rishu kumar", role: "Batter", photo: "https://drive.google.com/open?id=15lYHfG1MirLcp2rkEYNpeXlUlgrVtgFz", basePrice: 2 },
       { id: 2, name: "Intekhab", role: "Allrounder", photo: "https://drive.google.com/open?id=1HnFxNymxaIet1cz_3F4FG4TAiFEAU0WK", basePrice: 2 },
@@ -510,7 +513,7 @@
         lastAction: "INIT",
         phase: "ROUND1", // "ROUND1", "UNSOLD_SPLASH", "ROUND2_UNSOLD", "DRAFT_LOTTERY", "CONCLUDED"
         unsoldPool: [],
-        round1CompletedCount: INITIAL_PLAYERS.length,
+        chitPool: [],
         timerDuration: 20,
         timerEndsAt: now + 20000,
         timerIsPaused: false,
@@ -521,7 +524,7 @@
           team2: { name: "Royal Challengers", purse: 100, squad: [] },
           team3: { name: "Mumbai Titans", purse: 100, squad: [] }
         },
-        logs: ["Auction connected to Blitz Lite arena via Firebase."]
+        logs: ["Auction arena connected via Firebase."]
       };
     }
 
@@ -533,7 +536,7 @@
     let hasCelebratedFinale = false;
     const smartCropCache = {};
 
-    // Audio Engine
+    // Web Audio Synthesizer
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playTone(freq, type, duration, gainLevel = 0.2) {
       try {
@@ -606,6 +609,7 @@
       if (!appState.teams.team2.squad) appState.teams.team2.squad = [];
       if (!appState.teams.team3.squad) appState.teams.team3.squad = [];
       if (!appState.unsoldPool) appState.unsoldPool = [];
+      if (!appState.chitPool) appState.chitPool = [];
       if (!appState.logs) appState.logs = [];
 
       isAutoResolving = false;
@@ -660,7 +664,7 @@
       tempImg.src = imgUrl;
     }
 
-    // --- Precise Server-Synced Timer & Auto-Hammer ---
+    // --- Precise Server-Synced Timer & Auto-Hammer Engine ---
     setInterval(() => {
       if (!appState || !appState.players || appState.phase === 'UNSOLD_SPLASH' || appState.phase === 'DRAFT_LOTTERY' || appState.phase === 'CONCLUDED') return;
       if (appState.currentLotIndex >= appState.players.length) return;
@@ -769,15 +773,10 @@
       const squadCount = (team.squad || []).length;
       const targetSquad = 8;
       const futureSlots = Math.max(0, targetSquad - (squadCount + 1));
-      const reserved = futureSlots * 2;
+      // Base reservation: 2 pts during R1, 1 pt during R2
+      const reservePerSlot = (appState.phase === "ROUND2_UNSOLD") ? 1 : 2;
+      const reserved = futureSlots * reservePerSlot;
       return Math.max(0, team.purse - reserved);
-    }
-
-    function areAllPointsExhausted() {
-      const m1 = calculateMaxLegalBid('team1');
-      const m2 = calculateMaxLegalBid('team2');
-      const m3 = calculateMaxLegalBid('team3');
-      return (m1 < 2 && m2 < 2 && m3 < 2);
     }
 
     function placeBidForTeam(teamKey) {
@@ -785,7 +784,8 @@
       const player = appState.players[appState.currentLotIndex];
       if (!player) return;
 
-      const nextBid = appState.leadingTeam ? appState.currentBid + 1 : player.basePrice;
+      const basePrice = (appState.phase === "ROUND2_UNSOLD") ? 1 : 2;
+      const nextBid = appState.leadingTeam ? appState.currentBid + 1 : basePrice;
       const maxBid = calculateMaxLegalBid(teamKey);
 
       if (appState.leadingTeam === teamKey) return;
@@ -811,37 +811,41 @@
       placeBidForTeam(teamKey);
     }
 
+    // --- Progression Engine Across Rounds ---
     function advanceToNextLotOrPhase() {
       appState.currentLotIndex++;
       appState.leadingTeam = null;
 
-      // Check if all team points are exhausted
-      if (areAllPointsExhausted()) {
-        const remainingPlayers = appState.players.slice(appState.currentLotIndex);
-        if (remainingPlayers.length > 0) {
-          appState.phase = "DRAFT_LOTTERY";
-          saveState("LOTTERY_TRIGGERED", "All purses exhausted. Entering Random Draft Lottery Round!");
-          return;
-        }
-      }
-
-      // Check if Round 1 is completed
+      // 1. END OF ROUND 1:
       if (appState.phase === "ROUND1" && appState.currentLotIndex >= appState.players.length) {
         if (appState.unsoldPool && appState.unsoldPool.length > 0) {
           appState.phase = "UNSOLD_SPLASH";
-          saveState("UNSOLD_SPLASH", "Round 1 concluded. Accelerated Unsold Round ready.");
+          saveState("UNSOLD_SPLASH", "Round 1 concluded! Accelerated Unsold Round ready.");
           return;
         } else {
           appState.phase = "CONCLUDED";
-          saveState("CONCLUDED", "Auction concluded with all players drafted!");
+          saveState("CONCLUDED", "Auction concluded! All players sold in Round 1.");
           return;
         }
       }
 
-      // Normal next player
+      // 2. END OF ROUND 2: Automatic shift to Chit-Picking Round
+      if (appState.phase === "ROUND2_UNSOLD" && appState.currentLotIndex >= appState.players.length) {
+        if (appState.chitPool && appState.chitPool.length > 0) {
+          appState.phase = "DRAFT_LOTTERY";
+          saveState("LOTTERY_TRIGGERED", "Round 2 concluded! Entering Chit-Picking Round for unsold players.");
+          return;
+        } else {
+          appState.phase = "CONCLUDED";
+          saveState("CONCLUDED", "Auction concluded! All players drafted across Round 1 & 2.");
+          return;
+        }
+      }
+
+      // Continue within current round
       const next = appState.players[appState.currentLotIndex];
       if (next) {
-        appState.currentBid = next.basePrice || 2;
+        appState.currentBid = (appState.phase === "ROUND2_UNSOLD") ? 1 : 2;
         appState.timerEndsAt = getSyncedNow() + 20000;
         appState.timerIsPaused = false;
       } else {
@@ -857,7 +861,14 @@
       const winTeam = appState.teams[appState.leadingTeam];
       if (!winTeam.squad) winTeam.squad = [];
       winTeam.purse -= appState.currentBid;
-      winTeam.squad.push({ id: player.id, name: player.name, role: player.role, price: appState.currentBid, photo: player.photo });
+      winTeam.squad.push({
+        id: player.id,
+        name: player.name,
+        role: player.role,
+        price: appState.currentBid,
+        photo: player.photo,
+        round: appState.phase
+      });
 
       const logMsg = `SOLD: ${player.name} to ${winTeam.name} for ${appState.currentBid} Pts!`;
       advanceToNextLotOrPhase();
@@ -870,49 +881,63 @@
       if (!player) return;
 
       const logMsg = `UNSOLD: ${player.name} passed.`;
-      if (!appState.unsoldPool) appState.unsoldPool = [];
-      appState.unsoldPool.push(player);
+      
+      // If passing in Round 1 -> enters unsold pool for Round 2
+      if (appState.phase === "ROUND1") {
+        if (!appState.unsoldPool) appState.unsoldPool = [];
+        appState.unsoldPool.push(player);
+      } 
+      // If passing in Round 2 -> enters chit pool for Chit-Picking Round
+      else if (appState.phase === "ROUND2_UNSOLD") {
+        if (!appState.chitPool) appState.chitPool = [];
+        appState.chitPool.push(player);
+      }
 
       advanceToNextLotOrPhase();
       saveState("UNSOLD", logMsg);
     }
 
+    // Commence Round 2 (Base price = 1 Pt for every player)
     function handleCommenceUnsoldRound() {
       if (currentRole !== 'admin' || !appState) return;
-      appState.players = [...appState.unsoldPool];
+      
+      // Load unsold players into active roster with basePrice = 1
+      appState.players = (appState.unsoldPool || []).map(p => ({
+        ...p,
+        basePrice: 1
+      }));
       appState.unsoldPool = [];
+      appState.chitPool = [];
       appState.currentLotIndex = 0;
       appState.phase = "ROUND2_UNSOLD";
+      
       const next = appState.players[0];
-      appState.currentBid = next ? next.basePrice : 2;
+      appState.currentBid = next ? 1 : 1;
       appState.leadingTeam = null;
       appState.timerEndsAt = getSyncedNow() + 20000;
       appState.timerIsPaused = false;
 
-      saveState("ROUND2_START", "Accelerated Unsold Players Round has officially commenced!");
+      saveState("ROUND2_START", "Round 2 has commenced! Base price is now 1 Pt.");
     }
 
-    // --- Draft Lottery Logic (Team-wise round robin) ---
+    // --- Chit-Picking / Draft Lottery Round (Round 3) Logic ---
     function handleDraftLotteryStep() {
       if (currentRole !== 'admin' || !appState) return;
-      const remaining = appState.players.slice(appState.currentLotIndex);
-      if (remaining.length === 0) {
+      if (!appState.chitPool || appState.chitPool.length === 0) {
         appState.phase = "CONCLUDED";
-        saveState("CONCLUDED", "Draft Lottery completed! All squads filled.");
+        saveState("CONCLUDED", "Chit-picking complete! All squads filled.");
         return;
       }
 
-      // Find the team with the smallest squad count
+      // Sort teams to award to the team with the smallest squad count first
       const teamsArr = ['team1', 'team2', 'team3'];
       teamsArr.sort((a, b) => (appState.teams[a].squad.length || 0) - (appState.teams[b].squad.length || 0));
       const chosenTeamKey = teamsArr[0];
 
-      // Pick random player
-      const randIdx = Math.floor(Math.random() * remaining.length);
-      const chosenPlayer = remaining[randIdx];
+      // Pick random player from the chit pool
+      const randIdx = Math.floor(Math.random() * appState.chitPool.length);
+      const chosenPlayer = appState.chitPool.splice(randIdx, 1)[0];
 
-      // Remove player and push into team
-      appState.players.splice(appState.currentLotIndex + randIdx, 1);
       appState.teams[chosenTeamKey].squad.push({
         id: chosenPlayer.id,
         name: chosenPlayer.name,
@@ -922,8 +947,8 @@
         lottery: true
       });
 
-      const logMsg = `DRAFT LOTTERY: ${chosenPlayer.name} allocated to ${appState.teams[chosenTeamKey].name} (0 Pts)`;
-      if (appState.players.length === appState.currentLotIndex) {
+      const logMsg = `CHIT DRAWN: ${chosenPlayer.name} allocated to ${appState.teams[chosenTeamKey].name} (0 Pts)`;
+      if (appState.chitPool.length === 0) {
         appState.phase = "CONCLUDED";
       }
       saveState("LOTTERY_PICK", logMsg);
@@ -931,13 +956,13 @@
 
     function handleDraftLotteryAuto() {
       if (currentRole !== 'admin' || !appState) return;
-      while (appState.currentLotIndex < appState.players.length) {
+      while (appState.chitPool && appState.chitPool.length > 0) {
         handleDraftLotteryStep();
       }
     }
 
     function resetAuction() {
-      if (confirm("Reset the entire Blitz Lite auction? All state will return to the initial 24 player list.")) {
+      if (confirm("Reset the entire Blitz Lite auction? All state will return to Round 1.")) {
         hasCelebratedFinale = false;
         auctionRef.set(getDefaultState());
       }
@@ -974,7 +999,7 @@
           idx + 1,
           p.name,
           p.role,
-          p.lottery ? "Allocated (0 Pts)" : `${p.price} Pts`
+          p.lottery ? "Chit Pick (0 Pts)" : `${p.price} Pts`
         ]);
 
         doc.autoTable({
@@ -1073,7 +1098,7 @@
                 <span class="w-5 h-5 rounded-full bg-slate-800 text-slate-300 font-bold font-mono text-[10px] flex items-center justify-center">${pIdx + 1}</span>
                 <div>
                   <div class="font-bold text-white text-xs leading-snug">${p.name}</div>
-                  <div class="text-[10px] text-slate-400">${p.role} ${p.lottery ? '• <span class="text-purple-400">Lottery</span>' : ''}</div>
+                  <div class="text-[10px] text-slate-400">${p.role} ${p.lottery ? '• <span class="text-purple-400 font-bold">Chit Pick</span>' : ''}</div>
                 </div>
               </div>
               <span class="font-teko text-xl font-bold ${p.lottery ? 'text-purple-400' : 'text-amber-400'}">${p.price} Pts</span>
@@ -1087,7 +1112,7 @@
     function renderUI() {
       if (!appState) return;
 
-      // Phase 1: Unsold Splash Screen
+      // Phase 1: Unsold Splash Screen (Transition to Round 2)
       if (appState.phase === "UNSOLD_SPLASH") {
         document.getElementById("activeAuctionView").classList.add("hidden");
         document.getElementById("concludedView").classList.add("hidden");
@@ -1107,31 +1132,33 @@
         return;
       }
 
-      // Phase 2: Draft Lottery Splash Screen
+      // Phase 2: Chit-Picking Round (Round 3)
       if (appState.phase === "DRAFT_LOTTERY") {
         document.getElementById("activeAuctionView").classList.add("hidden");
         document.getElementById("concludedView").classList.add("hidden");
         document.getElementById("unsoldSplashView").classList.add("hidden");
         document.getElementById("lotterySplashView").classList.remove("hidden");
 
-        const remainingCount = Math.max(0, appState.players.length - appState.currentLotIndex);
-        document.getElementById("lotteryDraftText").textContent = `${remainingCount} Unallocated Players Remaining`;
+        const remainingCount = (appState.chitPool || []).length;
+        document.getElementById("lotteryDraftText").textContent = `${remainingCount} Unsold Players in Chit Bowl`;
 
         if (currentRole === 'admin') {
           document.getElementById("lotteryAdminAction").classList.remove("hidden");
+          document.getElementById("lotteryWaitingNote").classList.add("hidden");
         } else {
           document.getElementById("lotteryAdminAction").classList.add("hidden");
+          document.getElementById("lotteryWaitingNote").classList.remove("hidden");
         }
         return;
       }
 
       // Phase 3: Total Conclusion
-      if (appState.phase === "CONCLUDED" || (appState.players && appState.currentLotIndex >= appState.players.length)) {
+      if (appState.phase === "CONCLUDED" || (appState.players && appState.currentLotIndex >= appState.players.length && appState.phase !== "ROUND1" && appState.phase !== "ROUND2_UNSOLD")) {
         renderFinalRosters();
         return;
       }
 
-      // Phase 4: Standard Active Auction
+      // Phase 4: Standard Active Bidding
       document.getElementById("activeAuctionView").classList.remove("hidden");
       document.getElementById("concludedView").classList.add("hidden");
       document.getElementById("unsoldSplashView").classList.add("hidden");
@@ -1140,11 +1167,21 @@
       const player = appState.players[appState.currentLotIndex];
       if (!player) return;
 
+      const isRound2 = (appState.phase === "ROUND2_UNSOLD");
+      const roundBadgeEl = document.getElementById('roundBadge');
+      if (isRound2) {
+        roundBadgeEl.className = "bg-amber-600 text-black font-teko text-lg font-bold px-2.5 py-0.5 rounded uppercase";
+        roundBadgeEl.textContent = "ROUND 2 (UNSOLD)";
+      } else {
+        roundBadgeEl.className = "bg-indigo-600 text-white font-teko text-lg font-bold px-2.5 py-0.5 rounded uppercase";
+        roundBadgeEl.textContent = "ROUND 1";
+      }
+
       document.getElementById('lotNumberBadge').textContent = `LOT #${appState.currentLotIndex + 1} of ${appState.players.length}`;
       document.getElementById('playerName').textContent = player.name;
       document.getElementById('playerRoleBadge').textContent = player.role;
       document.getElementById('playerSpecialty').textContent = `Specialist ${player.role}`;
-      document.getElementById('playerBasePrice').textContent = `${player.basePrice} Pts`;
+      document.getElementById('playerBasePrice').textContent = `${isRound2 ? 1 : 2} Pts`;
       document.getElementById('playerCurrentBid').textContent = `${appState.currentBid} Pts`;
 
       // Smartcrop Face-Processing for Image
@@ -1168,7 +1205,7 @@
       if (appState.leadingTeam) {
         leaderBadge.textContent = `${appState.teams[appState.leadingTeam].name} (${appState.currentBid} Pts)`;
       } else {
-        leaderBadge.textContent = "None (At Base Price)";
+        leaderBadge.textContent = `None (At Base Price ${isRound2 ? '1 Pt' : '2 Pts'})`;
       }
 
       ['team1', 'team2', 'team3'].forEach((tKey, idx) => {
@@ -1194,7 +1231,8 @@
 
       if (['team1', 'team2', 'team3'].includes(currentRole)) {
         const myMaxBid = calculateMaxLegalBid(currentRole);
-        const nextPrice = appState.leadingTeam ? appState.currentBid + 1 : player.basePrice;
+        const basePrice = isRound2 ? 1 : 2;
+        const nextPrice = appState.leadingTeam ? appState.currentBid + 1 : basePrice;
         const btn = document.getElementById('raisePaddleBtn');
         const feedback = document.getElementById('paddleFeedback');
 
