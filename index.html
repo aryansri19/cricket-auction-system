@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Live Cricket Auction Arena</title>
+  <title>Blitz Lite - Live Auction Arena</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   
@@ -11,6 +11,13 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   
+  <!-- Smartcrop.js for face/content-aware 1:1 cropping -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/smartcrop/2.0.5/smartcrop.js"></script>
+
+  <!-- jsPDF & autoTable for Client-Side Roster PDF Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Teko:wght@400;600;700&family=Inter:wght@400;500;700;900&display=swap');
@@ -20,9 +27,7 @@
       0%, 100% { border-color: rgba(239, 68, 68, 1); box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); }
       50% { border-color: rgba(239, 68, 68, 0.3); box-shadow: 0 0 5px rgba(239, 68, 68, 0.1); }
     }
-    .urgent-timer {
-      animation: urgentPulse 0.8s infinite;
-    }
+    .urgent-timer { animation: urgentPulse 0.8s infinite; }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
@@ -32,7 +37,7 @@
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
         <div class="bg-amber-500 text-black px-2.5 py-1 rounded font-teko text-2xl font-bold tracking-wider uppercase">
-          IPL Auction
+          Blitz Lite
         </div>
         <div>
           <h1 class="text-base font-bold text-white flex items-center gap-2">
@@ -41,7 +46,7 @@
               <span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5 animate-pulse"></span> Connecting...
             </span>
           </h1>
-          <p class="text-[11px] text-slate-400">Purse: 100 Pts | Min Squad: 12 | Base: 2 Pts | Cloud Synced</p>
+          <p class="text-[11px] text-slate-400">Purse: 100 Pts | Min Squad: 8 | Base: 2 Pts | Cloud Synced</p>
         </div>
       </div>
 
@@ -49,7 +54,8 @@
         <div id="roleBadge" class="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase tracking-wider flex items-center gap-2 bg-slate-800 border-slate-700 text-slate-300">
           <i class="fa-solid fa-tv"></i> <span>Spectator</span>
         </div>
-        <button onclick="toggleShareModal(true)" class="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/40 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5">
+        <!-- Links button only shown on Auctioneer Desk -->
+        <button id="adminLinksBtn" onclick="toggleShareModal(true)" class="hidden bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/40 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5">
           <i class="fa-solid fa-share-nodes"></i> Links
         </button>
         <button onclick="resetAuction()" id="resetBtn" class="hidden bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 px-2.5 py-1.5 rounded-lg text-xs font-bold" title="Reset Auction">
@@ -62,7 +68,7 @@
   <!-- Main Content -->
   <main class="max-w-7xl mx-auto w-full p-4 lg:p-6 flex-1 flex flex-col gap-6">
 
-    <!-- Active Auction View (Hidden once concluded) -->
+    <!-- Active Auction View -->
     <div id="activeAuctionView" class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
       <!-- Left: Current Lot & Console (7 Cols) -->
       <div class="lg:col-span-7 flex flex-col gap-6">
@@ -72,7 +78,7 @@
           <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div class="flex items-center gap-2">
               <span id="lotNumberBadge" class="bg-amber-500 text-black font-teko text-xl font-bold px-3 py-0.5 rounded uppercase">LOT #1</span>
-              <span id="playerRoleBadge" class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-sky-500/20 text-sky-400 border border-sky-500/30">Top-Order Batter</span>
+              <span id="playerRoleBadge" class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-sky-500/20 text-sky-400 border border-sky-500/30">Batter</span>
             </div>
 
             <!-- Synchronized Countdown Clock -->
@@ -84,19 +90,23 @@
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
-            <div class="sm:col-span-5 flex flex-col items-center justify-center p-6 bg-slate-950/70 border border-slate-800 rounded-xl">
-              <div class="w-32 h-32 rounded-full border-4 border-amber-500/80 p-1 flex items-center justify-center bg-slate-900">
-                <i id="playerRoleIcon" class="fa-solid fa-baseball-bat-ball text-5xl text-amber-400"></i>
+            <!-- 1:1 Face-Smartcropped Image Container -->
+            <div class="sm:col-span-5 flex flex-col items-center justify-center p-3 bg-slate-950/70 border border-slate-800 rounded-2xl">
+              <div class="w-40 h-40 rounded-2xl border-4 border-amber-500/80 p-1 bg-slate-900 relative overflow-hidden shadow-lg flex items-center justify-center">
+                <img id="playerPhotoImg" src="" alt="Player Photo" class="w-full h-full object-cover rounded-xl transition-opacity duration-300" style="object-position: center 20%;" crossorigin="anonymous" />
+                <div id="photoPlaceholderIcon" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900">
+                  <i id="playerRoleIcon" class="fa-solid fa-baseball-bat-ball text-5xl text-amber-400"></i>
+                </div>
               </div>
               <div id="playerCountry" class="mt-3 text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                <i class="fa-solid fa-earth-asia text-amber-500"></i> India
+                <i class="fa-solid fa-shield-halved text-amber-500"></i> Blitz Lite Squad
               </div>
             </div>
 
             <div class="sm:col-span-7 flex flex-col justify-between h-full">
               <div>
-                <h2 id="playerName" class="font-teko text-5xl font-bold uppercase leading-none text-white">Virat Kohli</h2>
-                <p id="playerSpecialty" class="text-xs text-slate-400 mt-1">Anchor batter with elite chasing record.</p>
+                <h2 id="playerName" class="font-teko text-5xl font-bold uppercase leading-none text-white">Rishu Kumar</h2>
+                <p id="playerSpecialty" class="text-xs text-slate-400 mt-1">Specialist Batter</p>
               </div>
 
               <div class="grid grid-cols-2 gap-3 mt-6 pt-4 border-t border-slate-800">
@@ -122,7 +132,7 @@
         <div id="captainConsole" class="hidden bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border-2 border-indigo-500/50 rounded-2xl p-6 shadow-2xl flex flex-col items-center justify-center text-center">
           <h3 id="captainConsoleTitle" class="text-lg font-bold text-indigo-300 uppercase tracking-wider mb-1">Captain Console</h3>
           <p id="captainSafetyNotice" class="text-xs text-slate-300 mb-6">
-            Your Max Legal Bid is <strong id="captainMaxBidDisplay" class="text-amber-400">78 Pts</strong>.
+            Your Max Legal Bid is <strong id="captainMaxBidDisplay" class="text-amber-400">86 Pts</strong>.
           </p>
 
           <button id="raisePaddleBtn" onclick="handleCaptainRaiseBid()" class="w-full max-w-md py-6 px-8 rounded-2xl font-teko text-4xl font-bold uppercase tracking-wider transition bg-gradient-to-b from-emerald-500 to-emerald-700 text-black hover:from-emerald-400 hover:to-emerald-600 shadow-xl cursor-pointer active:scale-95">
@@ -206,8 +216,8 @@
           </div>
           <div class="grid grid-cols-3 gap-2 py-2 border-y border-slate-800 text-center">
             <div><span class="text-[10px] text-slate-500 uppercase block">Purse</span><span id="purseVal1" class="font-teko text-2xl text-amber-400">100 Pts</span></div>
-            <div><span class="text-[10px] text-slate-500 uppercase block">Squad</span><span id="squadVal1" class="font-teko text-2xl text-white">0 / 12</span></div>
-            <div><span class="text-[10px] text-slate-500 uppercase block">Max Bid</span><span id="maxBidVal1" class="font-teko text-2xl text-slate-300">78 Pts</span></div>
+            <div><span class="text-[10px] text-slate-500 uppercase block">Squad</span><span id="squadVal1" class="font-teko text-2xl text-white">0 / 8</span></div>
+            <div><span class="text-[10px] text-slate-500 uppercase block">Max Bid</span><span id="maxBidVal1" class="font-teko text-2xl text-slate-300">86 Pts</span></div>
           </div>
           <div class="w-full bg-slate-950 rounded-full h-1.5 mt-3 overflow-hidden">
             <div id="squadBar1" class="bg-blue-500 h-1.5" style="width: 0%"></div>
@@ -225,8 +235,8 @@
           </div>
           <div class="grid grid-cols-3 gap-2 py-2 border-y border-slate-800 text-center">
             <div><span class="text-[10px] text-slate-500 uppercase block">Purse</span><span id="purseVal2" class="font-teko text-2xl text-amber-400">100 Pts</span></div>
-            <div><span class="text-[10px] text-slate-500 uppercase block">Squad</span><span id="squadVal2" class="font-teko text-2xl text-white">0 / 12</span></div>
-            <div><span class="text-[10px] text-slate-500 uppercase block">Max Bid</span><span id="maxBidVal2" class="font-teko text-2xl text-slate-300">78 Pts</span></div>
+            <div><span class="text-[10px] text-slate-500 uppercase block">Squad</span><span id="squadVal2" class="font-teko text-2xl text-white">0 / 8</span></div>
+            <div><span class="text-[10px] text-slate-500 uppercase block">Max Bid</span><span id="maxBidVal2" class="font-teko text-2xl text-slate-300">86 Pts</span></div>
           </div>
           <div class="w-full bg-slate-950 rounded-full h-1.5 mt-3 overflow-hidden">
             <div id="squadBar2" class="bg-amber-500 h-1.5" style="width: 0%"></div>
@@ -244,8 +254,8 @@
           </div>
           <div class="grid grid-cols-3 gap-2 py-2 border-y border-slate-800 text-center">
             <div><span class="text-[10px] text-slate-500 uppercase block">Purse</span><span id="purseVal3" class="font-teko text-2xl text-amber-400">100 Pts</span></div>
-            <div><span class="text-[10px] text-slate-500 uppercase block">Squad</span><span id="squadVal3" class="font-teko text-2xl text-white">0 / 12</span></div>
-            <div><span class="text-[10px] text-slate-500 uppercase block">Max Bid</span><span id="maxBidVal3" class="font-teko text-2xl text-slate-300">78 Pts</span></div>
+            <div><span class="text-[10px] text-slate-500 uppercase block">Squad</span><span id="squadVal3" class="font-teko text-2xl text-white">0 / 8</span></div>
+            <div><span class="text-[10px] text-slate-500 uppercase block">Max Bid</span><span id="maxBidVal3" class="font-teko text-2xl text-slate-300">86 Pts</span></div>
           </div>
           <div class="w-full bg-slate-950 rounded-full h-1.5 mt-3 overflow-hidden">
             <div id="squadBar3" class="bg-emerald-500 h-1.5" style="width: 0%"></div>
@@ -255,22 +265,68 @@
       </div>
     </div>
 
-    <!-- Final Roster Summary View (Shown on all screens after completion) -->
+    <!-- Splash Screen: Unsold Players Accelerated Round -->
+    <div id="unsoldSplashView" class="hidden w-full max-w-3xl mx-auto my-auto bg-slate-900 border-2 border-amber-500 rounded-3xl p-8 text-center shadow-2xl">
+      <div class="w-20 h-20 mx-auto rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center text-4xl mb-4">
+        <i class="fa-solid fa-rotate"></i>
+      </div>
+      <h2 class="font-teko text-5xl font-bold uppercase text-white mb-2">Round 1 Completed</h2>
+      <p class="text-sm text-slate-300 max-w-md mx-auto mb-6">
+        Entering the <strong class="text-amber-400">Accelerated Unsold Players Round</strong>. All passed players return to the block for franchise acquisition.
+      </p>
+      <div id="unsoldStatsBadge" class="inline-block px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 text-xs font-mono mb-8">
+        Remaining Unsold Players: <strong id="unsoldPoolCount" class="text-amber-400">0</strong>
+      </div>
+      <div id="unsoldAdminAction" class="hidden">
+        <button onclick="handleCommenceUnsoldRound()" class="px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-teko text-3xl font-bold uppercase rounded-2xl shadow-xl transition active:scale-95">
+          <i class="fa-solid fa-gavel mr-2"></i> Commence Round 2
+        </button>
+      </div>
+      <div id="unsoldWaitingNote" class="text-xs text-slate-500 italic">Waiting for Auctioneer to resume the hammer...</div>
+    </div>
+
+    <!-- Splash Screen: Points Exhausted - Draft Lottery Round -->
+    <div id="lotterySplashView" class="hidden w-full max-w-3xl mx-auto my-auto bg-slate-900 border-2 border-purple-500 rounded-3xl p-8 text-center shadow-2xl">
+      <div class="w-20 h-20 mx-auto rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/40 flex items-center justify-center text-4xl mb-4">
+        <i class="fa-solid fa-dice"></i>
+      </div>
+      <h2 class="font-teko text-5xl font-bold uppercase text-white mb-2">Points Exhausted</h2>
+      <p class="text-sm text-slate-300 max-w-md mx-auto mb-6">
+        All team purses are exhausted. Entering the <strong class="text-purple-400">Random Draft Lottery Round</strong> to balance remaining squads at 0 points.
+      </p>
+      <div id="lotteryCurrentPickBanner" class="p-4 bg-slate-950 border border-slate-800 rounded-2xl mb-8">
+        <span class="text-xs text-slate-400 uppercase font-bold block mb-1">Lottery Status</span>
+        <div id="lotteryDraftText" class="font-teko text-3xl text-purple-300">Ready to Draw</div>
+      </div>
+      <div id="lotteryAdminAction" class="hidden flex justify-center gap-4">
+        <button onclick="handleDraftLotteryStep()" class="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-teko text-2xl font-bold uppercase rounded-xl shadow-lg transition">
+          <i class="fa-solid fa-dice mr-2"></i> Draw Next Player
+        </button>
+        <button onclick="handleDraftLotteryAuto()" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-purple-300 font-teko text-2xl font-bold uppercase rounded-xl border border-purple-500/30 shadow-lg transition">
+          Auto-Resolve All
+        </button>
+      </div>
+    </div>
+
+    <!-- Final Roster Summary View -->
     <div id="concludedView" class="hidden w-full flex flex-col gap-6">
       
-      <!-- Finale Banner -->
+      <!-- Finale Banner with PDF Export -->
       <div class="bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-black p-6 rounded-2xl shadow-2xl flex flex-wrap items-center justify-between gap-4">
         <div>
           <div class="text-xs font-bold uppercase tracking-widest text-black/80 flex items-center gap-1.5">
-            <i class="fa-solid fa-trophy"></i> Mega Auction Official Result
+            <i class="fa-solid fa-trophy"></i> Blitz Lite Official Result
           </div>
           <h2 class="font-teko text-5xl font-bold uppercase tracking-wider leading-none mt-1 text-black">
-            Auction Concluded • Squad Rosters
+            Auction Concluded • Final Squads
           </h2>
-          <p class="text-xs font-medium text-black/80 mt-1">All lots completed. Below is the final lineup of players bought by each franchise.</p>
+          <p class="text-xs font-medium text-black/80 mt-1">All lots completed. Download the official roster PDF below.</p>
         </div>
         <div class="flex items-center gap-3">
-          <button onclick="fireConfettiBurst()" class="bg-black/90 hover:bg-black text-amber-400 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-lg transition">
+          <button onclick="generateRosterPDF()" class="bg-black hover:bg-slate-900 text-amber-400 px-5 py-3 rounded-xl text-sm font-bold uppercase tracking-wider flex items-center gap-2 shadow-2xl transition border border-amber-400/40">
+            <i class="fa-solid fa-file-pdf text-rose-400"></i> Download Squad Rosters (PDF)
+          </button>
+          <button onclick="fireConfettiBurst()" class="bg-black/40 hover:bg-black/60 text-black px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition">
             <i class="fa-solid fa-sparkles"></i> Celebrate
           </button>
         </div>
@@ -298,9 +354,7 @@
               <span id="finalPurse1" class="font-teko text-2xl font-bold text-emerald-400">100 Pts</span>
             </div>
           </div>
-          <div id="finalSquadList1" class="space-y-2 overflow-y-auto max-h-[500px] pr-1 flex-1 text-xs">
-            <!-- Dynamically injected -->
-          </div>
+          <div id="finalSquadList1" class="space-y-2 overflow-y-auto max-h-[500px] pr-1 flex-1 text-xs"></div>
         </div>
 
         <!-- Team 2 Final Roster -->
@@ -322,9 +376,7 @@
               <span id="finalPurse2" class="font-teko text-2xl font-bold text-emerald-400">100 Pts</span>
             </div>
           </div>
-          <div id="finalSquadList2" class="space-y-2 overflow-y-auto max-h-[500px] pr-1 flex-1 text-xs">
-            <!-- Dynamically injected -->
-          </div>
+          <div id="finalSquadList2" class="space-y-2 overflow-y-auto max-h-[500px] pr-1 flex-1 text-xs"></div>
         </div>
 
         <!-- Team 3 Final Roster -->
@@ -346,9 +398,7 @@
               <span id="finalPurse3" class="font-teko text-2xl font-bold text-emerald-400">100 Pts</span>
             </div>
           </div>
-          <div id="finalSquadList3" class="space-y-2 overflow-y-auto max-h-[500px] pr-1 flex-1 text-xs">
-            <!-- Dynamically injected -->
-          </div>
+          <div id="finalSquadList3" class="space-y-2 overflow-y-auto max-h-[500px] pr-1 flex-1 text-xs"></div>
         </div>
 
       </div>
@@ -356,25 +406,25 @@
 
   </main>
 
-  <!-- Share Links Modal -->
+  <!-- Share Links Modal (Auctioneer only) -->
   <div id="shareModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
         <h3 class="font-teko text-2xl font-bold text-white uppercase">Share Direct Links</h3>
         <button onclick="toggleShareModal(false)" class="text-slate-400 text-lg">&times;</button>
       </div>
-      <p class="text-xs text-slate-400 mb-3">Share these direct links. Each device connects directly via Firebase.</p>
+      <p class="text-xs text-slate-400 mb-3">Share these direct links with your captains and the TV screen.</p>
       <div class="space-y-2 text-xs">
         <div>
-          <span class="text-blue-400 font-bold block mb-1">Team 1 Link</span>
+          <span class="text-blue-400 font-bold block mb-1">Team 1 Link (Super Kings)</span>
           <input id="shareLink1" readonly class="w-full bg-slate-950 border border-slate-800 p-2 rounded text-[11px]" />
         </div>
         <div>
-          <span class="text-amber-400 font-bold block mb-1">Team 2 Link</span>
+          <span class="text-amber-400 font-bold block mb-1">Team 2 Link (Royal Challengers)</span>
           <input id="shareLink2" readonly class="w-full bg-slate-950 border border-slate-800 p-2 rounded text-[11px]" />
         </div>
         <div>
-          <span class="text-emerald-400 font-bold block mb-1">Team 3 Link</span>
+          <span class="text-emerald-400 font-bold block mb-1">Team 3 Link (Mumbai Titans)</span>
           <input id="shareLink3" readonly class="w-full bg-slate-950 border border-slate-800 p-2 rounded text-[11px]" />
         </div>
         <div>
@@ -415,43 +465,40 @@
       return Date.now() + serverTimeOffset;
     }
 
+    // Direct Google Drive direct image URL transformer
+    function formatDrivePhotoUrl(rawUrl) {
+      if (!rawUrl) return '';
+      const match = rawUrl.match(/[-\w]{25,}/);
+      if (!match) return rawUrl;
+      return `https://lh3.googleusercontent.com/d/${match[0]}=w800`;
+    }
+
+    // PLAYERS PARSED FROM GOOGLE SHEET
     const INITIAL_PLAYERS = [
-      { id: 1, name: "Virat Kohli", role: "Top-Order Batter", icon: "fa-baseball-bat-ball", country: "India", basePrice: 2, specialty: "Anchor batter with elite chasing record." },
-      { id: 2, name: "Jasprit Bumrah", role: "Fast Bowler", icon: "fa-bowling-ball", country: "India", basePrice: 2, specialty: "Death overs specialist with unplayable yorkers." },
-      { id: 3, name: "Hardik Pandya", role: "All-Rounder", icon: "fa-bolt", country: "India", basePrice: 2, specialty: "Power hitter & clutch seam bowler." },
-      { id: 4, name: "Rohit Sharma", role: "Opening Batter", icon: "fa-baseball-bat-ball", country: "India", basePrice: 2, specialty: "Destructive opener and strategic captain." },
-      { id: 5, name: "Rashid Khan", role: "Leg Spinner", icon: "fa-volleyball", country: "Afghanistan", basePrice: 2, specialty: "Quick arm leg-spin with economical strike rate." },
-      { id: 6, name: "Travis Head", role: "Opening Batter", icon: "fa-baseball-bat-ball", country: "Australia", basePrice: 2, specialty: "Fearless powerplay strike rate." },
-      { id: 7, name: "Heinrich Klaasen", role: "Wicketkeeper Batter", icon: "fa-mitten", country: "South Africa", basePrice: 2, specialty: "Elite middle-order spin destroyer." },
-      { id: 8, name: "Pat Cummins", role: "Pace All-Rounder", icon: "fa-shield-halved", country: "Australia", basePrice: 2, specialty: "Disciplined seam bowling and lower-order hitting." },
-      { id: 9, name: "Suryakumar Yadav", role: "T20 Batter", icon: "fa-crosshairs", country: "India", basePrice: 2, specialty: "360-degree range hitter in all phases." },
-      { id: 10, name: "Glenn Maxwell", role: "Spin All-Rounder", icon: "fa-bolt-lightning", country: "Australia", basePrice: 2, specialty: "High-risk explosive match winner." },
-      { id: 11, name: "Kagiso Rabada", role: "Fast Bowler", icon: "fa-gauge-high", country: "South Africa", basePrice: 2, specialty: "Outright pace and wicket-taking consistency." },
-      { id: 12, name: "Rishabh Pant", role: "Wicketkeeper Batter", icon: "fa-mitten", country: "India", basePrice: 2, specialty: "Dynamic left-handed counter-attacker." },
-      { id: 13, name: "Mitchell Starc", role: "Left-Arm Fast", icon: "fa-bowling-ball", country: "Australia", basePrice: 2, specialty: "In-swinging toe crushers with the new ball." },
-      { id: 14, name: "Jos Buttler", role: "Wicketkeeper Batter", icon: "fa-mitten", country: "England", basePrice: 2, specialty: "Classic stroke play combined with power hitting." },
-      { id: 15, name: "Trent Boult", role: "Left-Arm Seam", icon: "fa-wind", country: "New Zealand", basePrice: 2, specialty: "First over wicket wizard." },
-      { id: 16, name: "Ravindra Jadeja", role: "All-Rounder", icon: "fa-bolt", country: "India", basePrice: 2, specialty: "Stifling spin, gun fielding, and lower order punch." },
-      { id: 17, name: "Shubman Gill", role: "Top-Order Batter", icon: "fa-baseball-bat-ball", country: "India", basePrice: 2, specialty: "Pure timing and long innings builder." },
-      { id: 18, name: "Mohammed Shami", role: "Fast Bowler", icon: "fa-bowling-ball", country: "India", basePrice: 2, specialty: "Upright seam position and relentless accuracy." },
-      { id: 19, name: "Nicholas Pooran", role: "Power Batter", icon: "fa-fire", country: "West Indies", basePrice: 2, specialty: "Effortless boundary clearing ability." },
-      { id: 20, name: "Axar Patel", role: "Spin All-Rounder", icon: "fa-shield-halved", country: "India", basePrice: 2, specialty: "Accurate left-arm dart spin and dependable batting." },
-      { id: 21, name: "Sunil Narine", role: "Mystery Spinner", icon: "fa-wand-magic-sparkles", country: "West Indies", basePrice: 2, specialty: "Unorthodox mystery spin & pinch hitting." },
-      { id: 22, name: "Rinku Singh", role: "Finisher", icon: "fa-hand-fist", country: "India", basePrice: 2, specialty: "Calm head under pressure in chase scenarios." },
-      { id: 23, name: "Arshdeep Singh", role: "Left-Arm Seam", icon: "fa-wind", country: "India", basePrice: 2, specialty: "Wide-line yorker execution in the 20th over." },
-      { id: 24, name: "David Warner", role: "Opening Batter", icon: "fa-baseball-bat-ball", country: "Australia", basePrice: 2, specialty: "Aggressive veteran opening batsman." },
-      { id: 25, name: "Kuldeep Yadav", role: "Wrist Spinner", icon: "fa-volleyball", country: "India", basePrice: 2, specialty: "Deceptive wrong'un and middle overs breakthrough specialist." },
-      { id: 26, name: "Andre Russell", role: "Power All-Rounder", icon: "fa-dumbbell", country: "West Indies", basePrice: 2, specialty: "Unmatched raw bat speed and heavy balls." },
-      { id: 27, name: "KL Rahul", role: "Top-Order Batter", icon: "fa-baseball-bat-ball", country: "India", basePrice: 2, specialty: "Technically solid anchor and wicketkeeper." },
-      { id: 28, name: "Matheesha Pathirana", role: "Sling Fast Bowler", icon: "fa-forward-fast", country: "Sri Lanka", basePrice: 2, specialty: "Deadly yorkers and unplayable angles." },
-      { id: 29, name: "Yuzvendra Chahal", role: "Leg Spinner", icon: "fa-volleyball", country: "India", basePrice: 2, specialty: "Most wickets in franchise history." },
-      { id: 30, name: "Sam Curran", role: "Pace All-Rounder", icon: "fa-shield-halved", country: "England", basePrice: 2, specialty: "Variations, cutters, and fighting spirit." },
-      { id: 31, name: "Sanju Samson", role: "Wicketkeeper Batter", icon: "fa-mitten", country: "India", basePrice: 2, specialty: "Clean ball striker from ball one." },
-      { id: 32, name: "Anrich Nortje", role: "Express Fast", icon: "fa-gauge-high", country: "South Africa", basePrice: 2, specialty: "150 km/h thunderbolts." },
-      { id: 33, name: "Tilak Varma", role: "Middle-Order Batter", icon: "fa-baseball-bat-ball", country: "India", basePrice: 2, specialty: "Composed young left-hander." },
-      { id: 34, name: "Varun Chakaravarthy", role: "Mystery Spinner", icon: "fa-wand-magic-sparkles", country: "India", basePrice: 2, specialty: "Difficult carrom-ball variations." },
-      { id: 35, name: "Shivam Dube", role: "Power All-Rounder", icon: "fa-fire", country: "India", basePrice: 2, specialty: "Massive arc against slow bowlers." },
-      { id: 36, name: "Lockie Ferguson", role: "Fast Bowler", icon: "fa-forward-fast", country: "New Zealand", basePrice: 2, specialty: "Aggressive bouncers and searing pace." }
+      { id: 1, name: "Rishu kumar", role: "Batter", photo: "https://drive.google.com/open?id=15lYHfG1MirLcp2rkEYNpeXlUlgrVtgFz", basePrice: 2 },
+      { id: 2, name: "Intekhab", role: "Allrounder", photo: "https://drive.google.com/open?id=1HnFxNymxaIet1cz_3F4FG4TAiFEAU0WK", basePrice: 2 },
+      { id: 3, name: "Saanvi Taneja", role: "Allrounder", photo: "https://drive.google.com/open?id=1mRREE4mxv9A0n070V34n-CWAU39WXZmK", basePrice: 2 },
+      { id: 4, name: "Arnesh Saha", role: "Allrounder", photo: "https://drive.google.com/open?id=1zMW4uCnzyFXsePi4h3ELJ46UjmUwGM-l", basePrice: 2 },
+      { id: 5, name: "Sanket Jana", role: "Batter", photo: "https://drive.google.com/open?id=1ndBZ7Jph_Ke7xy448h9l6vuzxQfyPxQt", basePrice: 2 },
+      { id: 6, name: "Sayan Roy", role: "Allrounder", photo: "https://drive.google.com/open?id=1NYYtuNlr3L9L-VfFlZLATRk5egx1LsD0", basePrice: 2 },
+      { id: 7, name: "Anshika trivedi", role: "Batter", photo: "https://drive.google.com/open?id=1cpnBendSxmZnVJ4zqc--zCfYqSVRfcGG", basePrice: 2 },
+      { id: 8, name: "Sayan Biswas", role: "Allrounder", photo: "https://drive.google.com/open?id=1L3ymaLt5GiVGIMb87UFqXZDRxgBYsPhV", basePrice: 2 },
+      { id: 9, name: "Abhigyan Prakash", role: "Allrounder", photo: "https://drive.google.com/open?id=1dNjjyIVfKlzpiBse0Iq3OE6jM3OxKIKX", basePrice: 2 },
+      { id: 10, name: "Kabir Puri", role: "Bowler", photo: "https://drive.google.com/open?id=1_R9Q6S34yF8FpEhr_hN4yMzOLBIAFkba", basePrice: 2 },
+      { id: 11, name: "Pragya Sharma", role: "Allrounder", photo: "https://drive.google.com/open?id=1M1qJ7inp4S-XISXyrTfBkucZsd2eDmE8", basePrice: 2 },
+      { id: 12, name: "Varsha HM", role: "Bowler", photo: "https://drive.google.com/open?id=1OMDuiwMeis3MJOZZSJ9mzxCK7IXt0q6z", basePrice: 2 },
+      { id: 13, name: "Vishnu priya", role: "Allrounder", photo: "https://drive.google.com/open?id=1gc-s7ZxNnj7HuykYdGZ72ZLRzn1MPuZn", basePrice: 2 },
+      { id: 14, name: "Chirag Panjwani", role: "Batter", photo: "https://drive.google.com/open?id=1dJKDjhM01L4_TqIg0AEsZwzMBqutxw7f", basePrice: 2 },
+      { id: 15, name: "Md Refatullah", role: "Allrounder", photo: "https://drive.google.com/open?id=1VrwACdFMkOZZg7QEIH23NbIR51SWe7Qm", basePrice: 2 },
+      { id: 16, name: "Raghav goel", role: "Allrounder", photo: "https://drive.google.com/open?id=1qVOCnx0Pj4SAiBP941fUMq2aq9dSWUzm", basePrice: 2 },
+      { id: 17, name: "Sparsh", role: "Batter", photo: "https://drive.google.com/open?id=1O6-J256d0FUoQekWZJLE0XGv1jnZOQzR", basePrice: 2 },
+      { id: 18, name: "Hammad Karim", role: "Allrounder", photo: "https://drive.google.com/open?id=1oG7_hWcgccC83i_zAm66bgolLm7DE1jv", basePrice: 2 },
+      { id: 19, name: "Serah Santimano", role: "Batter", photo: "https://drive.google.com/open?id=1HY0JLXvB60Hpskonz6mJGfrqJLOo2lkC", basePrice: 2 },
+      { id: 20, name: "Vedant sharma", role: "Batter", photo: "https://drive.google.com/open?id=1FoIZZ9sHajk5DqnbTOwvsEt53zCT3YO0", basePrice: 2 },
+      { id: 21, name: "Nitya", role: "Allrounder", photo: "https://drive.google.com/open?id=1XKWfCUu5PL0lzLOiYaocw_T4EilY1TgP", basePrice: 2 },
+      { id: 22, name: "Esha Srivastava", role: "Allrounder", photo: "https://drive.google.com/open?id=1te3dRPeENZggWlO8j5sXAE2wD8GYKbOw", basePrice: 2 },
+      { id: 23, name: "KS Sharvani", role: "Batter", photo: "https://drive.google.com/open?id=1J7Bn6XM92sCq5WjcsV1lsEk18nJWFZD_", basePrice: 2 },
+      { id: 24, name: "Hardik gaba", role: "Batter", photo: "https://drive.google.com/open?id=1wyvp_DouU_CHJFwfCp5QGvZCtjmwLVDx", basePrice: 2 }
     ];
 
     function getDefaultState() {
@@ -461,6 +508,9 @@
         currentBid: 2,
         leadingTeam: null,
         lastAction: "INIT",
+        phase: "ROUND1", // "ROUND1", "UNSOLD_SPLASH", "ROUND2_UNSOLD", "DRAFT_LOTTERY", "CONCLUDED"
+        unsoldPool: [],
+        round1CompletedCount: INITIAL_PLAYERS.length,
         timerDuration: 20,
         timerEndsAt: now + 20000,
         timerIsPaused: false,
@@ -471,7 +521,7 @@
           team2: { name: "Royal Challengers", purse: 100, squad: [] },
           team3: { name: "Mumbai Titans", purse: 100, squad: [] }
         },
-        logs: ["Auction connected via Firebase Cloud."]
+        logs: ["Auction connected to Blitz Lite arena via Firebase."]
       };
     }
 
@@ -481,8 +531,9 @@
     let lastSecondTickPlayed = -1;
     let isAutoResolving = false;
     let hasCelebratedFinale = false;
+    const smartCropCache = {};
 
-    // Web Audio Synthesizer
+    // Audio Engine
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playTone(freq, type, duration, gainLevel = 0.2) {
       try {
@@ -516,7 +567,7 @@
     }
 
     function fireConfettiBurst() {
-      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      confetti({ particleCount: 110, spread: 80, origin: { y: 0.6 } });
     }
 
     // --- Firebase Sync Engine ---
@@ -554,6 +605,7 @@
       if (!appState.teams.team1.squad) appState.teams.team1.squad = [];
       if (!appState.teams.team2.squad) appState.teams.team2.squad = [];
       if (!appState.teams.team3.squad) appState.teams.team3.squad = [];
+      if (!appState.unsoldPool) appState.unsoldPool = [];
       if (!appState.logs) appState.logs = [];
 
       isAutoResolving = false;
@@ -572,9 +624,46 @@
       auctionRef.set(appState);
     }
 
-    // --- Precise Server-Synced Timer & Auto-Hammer Engine ---
+    // --- Smartcrop.js 1:1 Face & Content Aware Processor ---
+    function processSmartCrop(imgUrl, cacheKey, callback) {
+      if (smartCropCache[cacheKey]) {
+        callback(smartCropCache[cacheKey]);
+        return;
+      }
+
+      const tempImg = new Image();
+      tempImg.crossOrigin = "anonymous";
+      tempImg.onload = function() {
+        if (typeof smartcrop !== "undefined") {
+          smartcrop.crop(tempImg, { width: 300, height: 300, minScale: 1.0 })
+            .then(result => {
+              const crop = result.topCrop;
+              const canvas = document.createElement("canvas");
+              canvas.width = 300;
+              canvas.height = 300;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(tempImg, crop.x, crop.y, crop.width, crop.height, 0, 0, 300, 300);
+              const dataUrl = canvas.toDataURL();
+              smartCropCache[cacheKey] = dataUrl;
+              callback(dataUrl);
+            })
+            .catch(() => {
+              callback(imgUrl);
+            });
+        } else {
+          callback(imgUrl);
+        }
+      };
+      tempImg.onerror = function() {
+        callback(imgUrl);
+      };
+      tempImg.src = imgUrl;
+    }
+
+    // --- Precise Server-Synced Timer & Auto-Hammer ---
     setInterval(() => {
-      if (!appState || !appState.players || appState.currentLotIndex >= appState.players.length) return;
+      if (!appState || !appState.players || appState.phase === 'UNSOLD_SPLASH' || appState.phase === 'DRAFT_LOTTERY' || appState.phase === 'CONCLUDED') return;
+      if (appState.currentLotIndex >= appState.players.length) return;
 
       const timerContainer = document.getElementById("timerContainer");
       const timerText = document.getElementById("timerText");
@@ -602,7 +691,6 @@
           timerText.className = "font-teko text-2xl font-bold tracking-wider text-rose-400";
           timerSubtext.textContent = "HAMMER DROPPING";
 
-          // Auto-sell logic executed exclusively by the Auctioneer host
           if (currentRole === 'admin' && !isAutoResolving) {
             isAutoResolving = true;
             soundBuzzer();
@@ -679,9 +767,17 @@
       if (!appState) return 0;
       const team = appState.teams[teamKey];
       const squadCount = (team.squad || []).length;
-      const futureSlots = Math.max(0, 12 - (squadCount + 1));
+      const targetSquad = 8;
+      const futureSlots = Math.max(0, targetSquad - (squadCount + 1));
       const reserved = futureSlots * 2;
       return Math.max(0, team.purse - reserved);
+    }
+
+    function areAllPointsExhausted() {
+      const m1 = calculateMaxLegalBid('team1');
+      const m2 = calculateMaxLegalBid('team2');
+      const m3 = calculateMaxLegalBid('team3');
+      return (m1 < 2 && m2 < 2 && m3 < 2);
     }
 
     function placeBidForTeam(teamKey) {
@@ -700,8 +796,7 @@
 
       const now = getSyncedNow();
       const currentRemaining = Math.max(0, (appState.timerEndsAt || now) - now);
-      const resetDurationMs = 15000;
-      appState.timerEndsAt = Math.max(now + resetDurationMs, now + currentRemaining + 4000);
+      appState.timerEndsAt = Math.max(now + 15000, now + currentRemaining + 4000);
       appState.timerIsPaused = false;
 
       saveState("BID", `Bid raised to ${nextBid} Pts by ${appState.teams[teamKey].name}`);
@@ -716,6 +811,44 @@
       placeBidForTeam(teamKey);
     }
 
+    function advanceToNextLotOrPhase() {
+      appState.currentLotIndex++;
+      appState.leadingTeam = null;
+
+      // Check if all team points are exhausted
+      if (areAllPointsExhausted()) {
+        const remainingPlayers = appState.players.slice(appState.currentLotIndex);
+        if (remainingPlayers.length > 0) {
+          appState.phase = "DRAFT_LOTTERY";
+          saveState("LOTTERY_TRIGGERED", "All purses exhausted. Entering Random Draft Lottery Round!");
+          return;
+        }
+      }
+
+      // Check if Round 1 is completed
+      if (appState.phase === "ROUND1" && appState.currentLotIndex >= appState.players.length) {
+        if (appState.unsoldPool && appState.unsoldPool.length > 0) {
+          appState.phase = "UNSOLD_SPLASH";
+          saveState("UNSOLD_SPLASH", "Round 1 concluded. Accelerated Unsold Round ready.");
+          return;
+        } else {
+          appState.phase = "CONCLUDED";
+          saveState("CONCLUDED", "Auction concluded with all players drafted!");
+          return;
+        }
+      }
+
+      // Normal next player
+      const next = appState.players[appState.currentLotIndex];
+      if (next) {
+        appState.currentBid = next.basePrice || 2;
+        appState.timerEndsAt = getSyncedNow() + 20000;
+        appState.timerIsPaused = false;
+      } else {
+        appState.phase = "CONCLUDED";
+      }
+    }
+
     function handleHammerSold() {
       if (currentRole !== 'admin' || !appState) return;
       const player = appState.players[appState.currentLotIndex];
@@ -724,17 +857,10 @@
       const winTeam = appState.teams[appState.leadingTeam];
       if (!winTeam.squad) winTeam.squad = [];
       winTeam.purse -= appState.currentBid;
-      winTeam.squad.push({ id: player.id, name: player.name, role: player.role, price: appState.currentBid });
+      winTeam.squad.push({ id: player.id, name: player.name, role: player.role, price: appState.currentBid, photo: player.photo });
 
-      const logMsg = `🔨 SOLD: ${player.name} to ${winTeam.name} for ${appState.currentBid} Pts!`;
-      appState.currentLotIndex++;
-      appState.leadingTeam = null;
-      const next = appState.players[appState.currentLotIndex];
-      appState.currentBid = next ? next.basePrice : 2;
-
-      appState.timerEndsAt = getSyncedNow() + 20000;
-      appState.timerIsPaused = false;
-
+      const logMsg = `SOLD: ${player.name} to ${winTeam.name} for ${appState.currentBid} Pts!`;
+      advanceToNextLotOrPhase();
       saveState("HAMMER", logMsg);
     }
 
@@ -743,24 +869,128 @@
       const player = appState.players[appState.currentLotIndex];
       if (!player) return;
 
-      const logMsg = `❌ UNSOLD: ${player.name} passed.`;
-      const passed = appState.players.splice(appState.currentLotIndex, 1)[0];
-      appState.players.push(passed);
+      const logMsg = `UNSOLD: ${player.name} passed.`;
+      if (!appState.unsoldPool) appState.unsoldPool = [];
+      appState.unsoldPool.push(player);
 
-      appState.currentBid = 2;
-      appState.leadingTeam = null;
-
-      appState.timerEndsAt = getSyncedNow() + 20000;
-      appState.timerIsPaused = false;
-
+      advanceToNextLotOrPhase();
       saveState("UNSOLD", logMsg);
     }
 
+    function handleCommenceUnsoldRound() {
+      if (currentRole !== 'admin' || !appState) return;
+      appState.players = [...appState.unsoldPool];
+      appState.unsoldPool = [];
+      appState.currentLotIndex = 0;
+      appState.phase = "ROUND2_UNSOLD";
+      const next = appState.players[0];
+      appState.currentBid = next ? next.basePrice : 2;
+      appState.leadingTeam = null;
+      appState.timerEndsAt = getSyncedNow() + 20000;
+      appState.timerIsPaused = false;
+
+      saveState("ROUND2_START", "Accelerated Unsold Players Round has officially commenced!");
+    }
+
+    // --- Draft Lottery Logic (Team-wise round robin) ---
+    function handleDraftLotteryStep() {
+      if (currentRole !== 'admin' || !appState) return;
+      const remaining = appState.players.slice(appState.currentLotIndex);
+      if (remaining.length === 0) {
+        appState.phase = "CONCLUDED";
+        saveState("CONCLUDED", "Draft Lottery completed! All squads filled.");
+        return;
+      }
+
+      // Find the team with the smallest squad count
+      const teamsArr = ['team1', 'team2', 'team3'];
+      teamsArr.sort((a, b) => (appState.teams[a].squad.length || 0) - (appState.teams[b].squad.length || 0));
+      const chosenTeamKey = teamsArr[0];
+
+      // Pick random player
+      const randIdx = Math.floor(Math.random() * remaining.length);
+      const chosenPlayer = remaining[randIdx];
+
+      // Remove player and push into team
+      appState.players.splice(appState.currentLotIndex + randIdx, 1);
+      appState.teams[chosenTeamKey].squad.push({
+        id: chosenPlayer.id,
+        name: chosenPlayer.name,
+        role: chosenPlayer.role,
+        price: 0,
+        photo: chosenPlayer.photo,
+        lottery: true
+      });
+
+      const logMsg = `DRAFT LOTTERY: ${chosenPlayer.name} allocated to ${appState.teams[chosenTeamKey].name} (0 Pts)`;
+      if (appState.players.length === appState.currentLotIndex) {
+        appState.phase = "CONCLUDED";
+      }
+      saveState("LOTTERY_PICK", logMsg);
+    }
+
+    function handleDraftLotteryAuto() {
+      if (currentRole !== 'admin' || !appState) return;
+      while (appState.currentLotIndex < appState.players.length) {
+        handleDraftLotteryStep();
+      }
+    }
+
     function resetAuction() {
-      if (confirm("Reset the entire auction? All data will return to starting state.")) {
+      if (confirm("Reset the entire Blitz Lite auction? All state will return to the initial 24 player list.")) {
         hasCelebratedFinale = false;
         auctionRef.set(getDefaultState());
       }
+    }
+
+    // --- Client-Side PDF Generation ---
+    function generateRosterPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(22);
+      doc.setTextColor(20, 20, 20);
+      doc.text("BLITZ LITE - OFFICIAL SQUAD ROSTERS", 40, 50);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Generated on: ${new Date().toLocaleString()} | Manipal College of Dental Sciences`, 40, 68);
+
+      let currentY = 95;
+
+      ['team1', 'team2', 'team3'].forEach((tKey) => {
+        const team = appState.teams[tKey];
+        const squad = team.squad || [];
+        const totalSpent = squad.reduce((sum, p) => sum + (p.price || 0), 0);
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(13);
+        doc.setTextColor(30, 30, 30);
+        doc.text(`${team.name.toUpperCase()} (Total Spent: ${totalSpent} Pts | Purse Left: ${team.purse} Pts)`, 40, currentY);
+
+        const rows = squad.map((p, idx) => [
+          idx + 1,
+          p.name,
+          p.role,
+          p.lottery ? "Allocated (0 Pts)" : `${p.price} Pts`
+        ]);
+
+        doc.autoTable({
+          startY: currentY + 8,
+          head: [["#", "Player Name", "Role", "Sold Price"]],
+          body: rows.length > 0 ? rows : [["-", "No players acquired", "-", "-"]],
+          theme: "grid",
+          headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: "bold" },
+          styles: { fontSize: 9, cellPadding: 5 },
+          margin: { left: 40, right: 40 }
+        });
+
+        currentY = doc.lastAutoTable.finalY + 25;
+      });
+
+      doc.save("Blitz_Lite_Official_Rosters.pdf");
     }
 
     function updateRoleUI() {
@@ -768,12 +998,14 @@
       const adminConsole = document.getElementById('adminConsole');
       const captainConsole = document.getElementById('captainConsole');
       const resetBtn = document.getElementById('resetBtn');
+      const adminLinksBtn = document.getElementById('adminLinksBtn');
 
       if (currentRole === 'admin') {
         badge.innerHTML = `<i class="fa-solid fa-gavel text-rose-400"></i> <span class="text-rose-300">Auctioneer</span>`;
         adminConsole.classList.remove('hidden');
         captainConsole.classList.add('hidden');
         resetBtn.classList.remove('hidden');
+        adminLinksBtn.classList.remove('hidden');
       } else if (['team1', 'team2', 'team3'].includes(currentRole)) {
         const teamNameMap = { team1: "Super Kings", team2: "Royal Challengers", team3: "Mumbai Titans" };
         const tName = (appState && appState.teams && appState.teams[currentRole]) ? appState.teams[currentRole].name : teamNameMap[currentRole];
@@ -781,12 +1013,14 @@
         adminConsole.classList.add('hidden');
         captainConsole.classList.remove('hidden');
         resetBtn.classList.add('hidden');
+        adminLinksBtn.classList.add('hidden');
         document.getElementById('captainConsoleTitle').textContent = `Captain Console: ${tName}`;
       } else {
         badge.innerHTML = `<i class="fa-solid fa-tv"></i> <span>Spectator</span>`;
         adminConsole.classList.add('hidden');
         captainConsole.classList.add('hidden');
         resetBtn.classList.add('hidden');
+        adminLinksBtn.classList.add('hidden');
       }
     }
 
@@ -804,9 +1038,10 @@
       document.getElementById('shareModal').classList.toggle('hidden', !show); 
     }
 
-    // --- Finale View Renderer ---
     function renderFinalRosters() {
       document.getElementById("activeAuctionView").classList.add("hidden");
+      document.getElementById("unsoldSplashView").classList.add("hidden");
+      document.getElementById("lotterySplashView").classList.add("hidden");
       document.getElementById("concludedView").classList.remove("hidden");
 
       if (!hasCelebratedFinale) {
@@ -838,10 +1073,10 @@
                 <span class="w-5 h-5 rounded-full bg-slate-800 text-slate-300 font-bold font-mono text-[10px] flex items-center justify-center">${pIdx + 1}</span>
                 <div>
                   <div class="font-bold text-white text-xs leading-snug">${p.name}</div>
-                  <div class="text-[10px] text-slate-400">${p.role}</div>
+                  <div class="text-[10px] text-slate-400">${p.role} ${p.lottery ? '• <span class="text-purple-400">Lottery</span>' : ''}</div>
                 </div>
               </div>
-              <span class="font-teko text-xl font-bold text-amber-400">${p.price} Pts</span>
+              <span class="font-teko text-xl font-bold ${p.lottery ? 'text-purple-400' : 'text-amber-400'}">${p.price} Pts</span>
             `;
             listEl.appendChild(row);
           });
@@ -852,26 +1087,82 @@
     function renderUI() {
       if (!appState) return;
 
-      // Check if auction is concluded
-      const isConcluded = !appState.players || appState.currentLotIndex >= appState.players.length;
-
-      if (isConcluded) {
-        renderFinalRosters();
-        return;
-      } else {
-        document.getElementById("activeAuctionView").classList.remove("hidden");
+      // Phase 1: Unsold Splash Screen
+      if (appState.phase === "UNSOLD_SPLASH") {
+        document.getElementById("activeAuctionView").classList.add("hidden");
         document.getElementById("concludedView").classList.add("hidden");
+        document.getElementById("lotterySplashView").classList.add("hidden");
+        document.getElementById("unsoldSplashView").classList.remove("hidden");
+
+        const count = (appState.unsoldPool || []).length;
+        document.getElementById("unsoldPoolCount").textContent = `${count} Players`;
+
+        if (currentRole === 'admin') {
+          document.getElementById("unsoldAdminAction").classList.remove("hidden");
+          document.getElementById("unsoldWaitingNote").classList.add("hidden");
+        } else {
+          document.getElementById("unsoldAdminAction").classList.add("hidden");
+          document.getElementById("unsoldWaitingNote").classList.remove("hidden");
+        }
+        return;
       }
 
+      // Phase 2: Draft Lottery Splash Screen
+      if (appState.phase === "DRAFT_LOTTERY") {
+        document.getElementById("activeAuctionView").classList.add("hidden");
+        document.getElementById("concludedView").classList.add("hidden");
+        document.getElementById("unsoldSplashView").classList.add("hidden");
+        document.getElementById("lotterySplashView").classList.remove("hidden");
+
+        const remainingCount = Math.max(0, appState.players.length - appState.currentLotIndex);
+        document.getElementById("lotteryDraftText").textContent = `${remainingCount} Unallocated Players Remaining`;
+
+        if (currentRole === 'admin') {
+          document.getElementById("lotteryAdminAction").classList.remove("hidden");
+        } else {
+          document.getElementById("lotteryAdminAction").classList.add("hidden");
+        }
+        return;
+      }
+
+      // Phase 3: Total Conclusion
+      if (appState.phase === "CONCLUDED" || (appState.players && appState.currentLotIndex >= appState.players.length)) {
+        renderFinalRosters();
+        return;
+      }
+
+      // Phase 4: Standard Active Auction
+      document.getElementById("activeAuctionView").classList.remove("hidden");
+      document.getElementById("concludedView").classList.add("hidden");
+      document.getElementById("unsoldSplashView").classList.add("hidden");
+      document.getElementById("lotterySplashView").classList.add("hidden");
+
       const player = appState.players[appState.currentLotIndex];
+      if (!player) return;
 
       document.getElementById('lotNumberBadge').textContent = `LOT #${appState.currentLotIndex + 1} of ${appState.players.length}`;
       document.getElementById('playerName').textContent = player.name;
       document.getElementById('playerRoleBadge').textContent = player.role;
-      document.getElementById('playerSpecialty').textContent = player.specialty;
-      document.getElementById('playerCountry').innerHTML = `<i class="fa-solid fa-earth-asia text-amber-500"></i> ${player.country}`;
+      document.getElementById('playerSpecialty').textContent = `Specialist ${player.role}`;
       document.getElementById('playerBasePrice').textContent = `${player.basePrice} Pts`;
       document.getElementById('playerCurrentBid').textContent = `${appState.currentBid} Pts`;
+
+      // Smartcrop Face-Processing for Image
+      const imgEl = document.getElementById('playerPhotoImg');
+      const placeholderEl = document.getElementById('photoPlaceholderIcon');
+
+      if (player.photo) {
+        placeholderEl.classList.add('hidden');
+        imgEl.classList.remove('hidden');
+        const formattedUrl = formatDrivePhotoUrl(player.photo);
+
+        processSmartCrop(formattedUrl, `player_${player.id}`, (croppedUrl) => {
+          imgEl.src = croppedUrl;
+        });
+      } else {
+        imgEl.classList.add('hidden');
+        placeholderEl.classList.remove('hidden');
+      }
 
       const leaderBadge = document.getElementById('leadingBidderBadge');
       if (appState.leadingTeam) {
@@ -887,10 +1178,10 @@
         const maxBid = calculateMaxLegalBid(tKey);
 
         document.getElementById(`purseVal${num}`).textContent = `${team.purse} Pts`;
-        document.getElementById(`squadVal${num}`).textContent = `${squadLen} / 12`;
+        document.getElementById(`squadVal${num}`).textContent = `${squadLen} / 8`;
         document.getElementById(`maxBidVal${num}`).textContent = `${maxBid} Pts`;
 
-        const pct = Math.min(100, Math.round((squadLen / 12) * 100));
+        const pct = Math.min(100, Math.round((squadLen / 8) * 100));
         document.getElementById(`squadBar${num}`).style.width = `${pct}%`;
 
         const leaderTag = document.getElementById(`badgeLeader${num}`);
@@ -918,7 +1209,7 @@
           btn.disabled = true;
           btn.className = "w-full max-w-md py-6 px-8 rounded-2xl font-teko text-4xl uppercase bg-rose-950 text-rose-400 cursor-not-allowed";
           btn.innerHTML = `<i class="fa-solid fa-lock"></i> Exceeds Limit`;
-          feedback.textContent = `Must reserve points for 12 players.`;
+          feedback.textContent = `Must reserve points for minimum squad.`;
         } else {
           btn.disabled = false;
           btn.className = "w-full max-w-md py-6 px-8 rounded-2xl font-teko text-4xl uppercase bg-gradient-to-b from-emerald-500 to-emerald-700 text-black hover:from-emerald-400 cursor-pointer shadow-xl active:scale-95";
