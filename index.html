@@ -10,9 +10,6 @@
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  
-  <!-- Smartcrop.js for face/content-aware 1:1 cropping -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/smartcrop/2.0.5/smartcrop.js"></script>
 
   <!-- jsPDF & autoTable for Client-Side Roster PDF Export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -30,7 +27,7 @@
     .urgent-timer { animation: urgentPulse 0.8s infinite; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans justify-between">
 
   <!-- Header -->
   <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 shadow-xl">
@@ -46,7 +43,7 @@
               <span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5 animate-pulse"></span> Connecting...
             </span>
           </h1>
-          <p class="text-[11px] text-slate-400">Purse: 100 Pts | Min Squad: 8 | Base: 2 Pts (R1) / 1 Pt (R2) | Cloud Synced</p>
+          <p class="text-[11px] text-slate-400">Purse: 100 Pts | Min Squad: 8 | Base: 2 Pts (R1) / 1 Pt (R2) | <span class="text-slate-400 font-medium">Created by ARYAN SRIVASTAVA</span></p>
         </div>
       </div>
 
@@ -66,10 +63,82 @@
   </header>
 
   <!-- Main Content -->
-  <main class="max-w-7xl mx-auto w-full p-4 lg:p-6 flex-1 flex flex-col gap-6">
+  <main class="max-w-7xl mx-auto w-full p-4 lg:p-6 flex-1 flex flex-col justify-center">
+
+    <!-- Splash Screen: Pre-Auction Rules & Information -->
+    <div id="preAuctionSplashView" class="w-full max-w-4xl mx-auto bg-slate-900 border-2 border-amber-500/60 rounded-3xl p-6 sm:p-10 shadow-2xl flex flex-col gap-6 my-auto">
+      <div class="flex flex-col items-center text-center">
+        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30 tracking-widest mb-2">
+          Official Briefing & Protocols
+        </span>
+        <h2 class="font-teko text-5xl sm:text-6xl font-bold uppercase tracking-wide text-white leading-none">
+          Blitz Lite Auction Arena
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-400 max-w-xl mt-1">
+          Review the franchise bidding regulations and purse rules before the hammer goes live.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+        <div class="p-4 bg-slate-950/80 border border-slate-800 rounded-2xl flex gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-lg shrink-0">
+            <i class="fa-solid fa-wallet"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-white text-sm uppercase">Purse & Squad Quotas</h4>
+            <p class="text-slate-400 mt-0.5">Every franchise starts with <strong class="text-amber-400">100 Points</strong>. Teams must maintain a reserve to acquire a mandatory minimum of <strong class="text-white">8 Players</strong>.</p>
+          </div>
+        </div>
+
+        <div class="p-4 bg-slate-950/80 border border-slate-800 rounded-2xl flex gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center text-lg shrink-0">
+            <i class="fa-solid fa-layer-group"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-white text-sm uppercase">Round Structure & Pricing</h4>
+            <p class="text-slate-400 mt-0.5"><strong class="text-sky-300">Round 1:</strong> Initial roster opens at <strong class="text-amber-400">2 Pts</strong> base.<br/><strong class="text-sky-300">Round 2:</strong> Unsold pool returns at <strong class="text-amber-400">1 Pt</strong> base price.</p>
+          </div>
+        </div>
+
+        <div class="p-4 bg-slate-950/80 border border-slate-800 rounded-2xl flex gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center text-lg shrink-0">
+            <i class="fa-solid fa-stopwatch"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-white text-sm uppercase">Synchronized Clock & Anti-Snipe</h4>
+            <p class="text-slate-400 mt-0.5">Each lot carries a 20s clock. Bids placed with under 5 seconds remaining automatically extend the clock to ensure fair competition.</p>
+          </div>
+        </div>
+
+        <div class="p-4 bg-slate-950/80 border border-slate-800 rounded-2xl flex gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-lg shrink-0">
+            <i class="fa-solid fa-ticket-simple"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-white text-sm uppercase">Round 3: Chit-Picking Round</h4>
+            <p class="text-slate-400 mt-0.5">Players who remain unsold after Round 2 are placed in a randomized lottery bowl and allocated sequentially to franchises at <strong class="text-purple-300">0 Points</strong>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 flex flex-col items-center justify-center text-center">
+        <!-- Auctioneer start action -->
+        <div id="preAuctionAdminBtnContainer" class="hidden">
+          <button onclick="handleStartLiveAuction()" class="px-10 py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-teko text-3xl font-bold uppercase rounded-2xl shadow-xl transition active:scale-95 flex items-center gap-3">
+            <i class="fa-solid fa-gavel"></i> Commence Live Auction
+          </button>
+        </div>
+        <!-- Spectator / Captain waiting state -->
+        <div id="preAuctionWaitingNote" class="text-xs text-slate-400 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+          Waiting for Auctioneer to officially open Round 1 bidding...
+        </div>
+        <span class="text-[11px] text-slate-500 mt-3 font-mono">Platform Design • Created by ARYAN SRIVASTAVA</span>
+      </div>
+    </div>
 
     <!-- Active Auction View -->
-    <div id="activeAuctionView" class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
+    <div id="activeAuctionView" class="hidden grid-cols-1 lg:grid-cols-12 gap-6 w-full">
       <!-- Left: Current Lot & Console (7 Cols) -->
       <div class="lg:col-span-7 flex flex-col gap-6">
         
@@ -91,10 +160,17 @@
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
-            <!-- 1:1 Face-Smartcropped Image Container -->
+            <!-- 1:1 Headshot Display -->
             <div class="sm:col-span-5 flex flex-col items-center justify-center p-3 bg-slate-950/70 border border-slate-800 rounded-2xl">
               <div class="w-40 h-40 rounded-2xl border-4 border-amber-500/80 p-1 bg-slate-900 relative overflow-hidden shadow-lg flex items-center justify-center">
-                <img id="playerPhotoImg" src="" alt="Player Photo" class="w-full h-full object-cover rounded-xl transition-opacity duration-300" style="object-position: center 20%;" crossorigin="anonymous" />
+                <img 
+                  id="playerPhotoImg" 
+                  src="" 
+                  alt="Player Photo" 
+                  class="w-full h-full object-cover rounded-xl" 
+                  style="object-position: center 20%;"
+                  onerror="handlePhotoError()"
+                />
                 <div id="photoPlaceholderIcon" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900">
                   <i id="playerRoleIcon" class="fa-solid fa-baseball-bat-ball text-5xl text-amber-400"></i>
                 </div>
@@ -167,15 +243,15 @@
 
           <div class="grid grid-cols-3 gap-3 mb-5">
             <button onclick="handleManualBid('team1')" class="py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-teko text-xl font-bold text-blue-400 flex flex-col items-center">
-              <span>+1 Team 1</span>
+              <span>+1 Retainers</span>
               <span id="adminMax1" class="text-[10px] text-slate-400 font-sans">Max: --</span>
             </button>
             <button onclick="handleManualBid('team2')" class="py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-teko text-xl font-bold text-amber-400 flex flex-col items-center">
-              <span>+1 Team 2</span>
+              <span>+1 Crushers</span>
               <span id="adminMax2" class="text-[10px] text-slate-400 font-sans">Max: --</span>
             </button>
             <button onclick="handleManualBid('team3')" class="py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-teko text-xl font-bold text-emerald-400 flex flex-col items-center">
-              <span>+1 Team 3</span>
+              <span>+1 Warriors</span>
               <span id="adminMax3" class="text-[10px] text-slate-400 font-sans">Max: --</span>
             </button>
           </div>
@@ -206,12 +282,15 @@
       <div class="lg:col-span-5 flex flex-col gap-5">
         <h3 class="font-teko text-3xl font-bold uppercase text-white">Franchise Purses</h3>
 
-        <!-- Team 1 -->
+        <!-- Team 1: Royal Challenger Retainers -->
         <div id="cardTeam1" class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-2">
               <span class="w-3.5 h-3.5 rounded-full bg-blue-500"></span>
-              <span class="font-teko text-2xl font-bold text-white">Super Kings (Team 1)</span>
+              <div>
+                <span class="font-teko text-2xl font-bold text-white block leading-none">Royal Challenger Retainers</span>
+                <span class="text-[11px] text-blue-400 font-medium">Captain: Abhigyan Prakash</span>
+              </div>
             </div>
             <span id="badgeLeader1" class="hidden text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 uppercase">Highest</span>
           </div>
@@ -225,12 +304,15 @@
           </div>
         </div>
 
-        <!-- Team 2 -->
+        <!-- Team 2: Crown Crushers -->
         <div id="cardTeam2" class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-2">
               <span class="w-3.5 h-3.5 rounded-full bg-amber-500"></span>
-              <span class="font-teko text-2xl font-bold text-white">Royal Challengers (Team 2)</span>
+              <div>
+                <span class="font-teko text-2xl font-bold text-white block leading-none">Crown Crushers</span>
+                <span class="text-[11px] text-amber-400 font-medium">Captain: Mourya Podapati</span>
+              </div>
             </div>
             <span id="badgeLeader2" class="hidden text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 uppercase">Highest</span>
           </div>
@@ -244,12 +326,15 @@
           </div>
         </div>
 
-        <!-- Team 3 -->
+        <!-- Team 3: Enamel Warriors -->
         <div id="cardTeam3" class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-2">
               <span class="w-3.5 h-3.5 rounded-full bg-emerald-500"></span>
-              <span class="font-teko text-2xl font-bold text-white">Mumbai Titans (Team 3)</span>
+              <div>
+                <span class="font-teko text-2xl font-bold text-white block leading-none">Enamel Warriors</span>
+                <span class="text-[11px] text-emerald-400 font-medium">Captain: Sayan Biswas</span>
+              </div>
             </div>
             <span id="badgeLeader3" class="hidden text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 uppercase">Highest</span>
           </div>
@@ -276,7 +361,7 @@
         Entering the <strong class="text-amber-400">Accelerated Unsold Players Round (Round 2)</strong>.
       </p>
       <div class="inline-block px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold mb-6">
-        Base Price Reduced to 1 Pt for All Players
+        Base Price Reduced to 1 Pt for All Returning Players
       </div>
       <div id="unsoldStatsBadge" class="block px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 text-xs font-mono mb-8">
         Returning Unsold Players: <strong id="unsoldPoolCount" class="text-amber-400">0</strong>
@@ -289,34 +374,56 @@
       <div id="unsoldWaitingNote" class="text-xs text-slate-500 italic">Waiting for Auctioneer to resume the hammer...</div>
     </div>
 
-    <!-- Splash Screen: Chit-Picking / Draft Lottery Round (Round 3) -->
-    <div id="lotterySplashView" class="hidden w-full max-w-3xl mx-auto my-auto bg-slate-900 border-2 border-purple-500 rounded-3xl p-8 text-center shadow-2xl">
-      <div class="w-20 h-20 mx-auto rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/40 flex items-center justify-center text-4xl mb-4">
+    <!-- Splash Screen: Transparent Chit-Picking Round (Round 3) -->
+    <div id="lotterySplashView" class="hidden w-full max-w-3xl mx-auto my-auto bg-slate-900 border-2 border-purple-500 rounded-3xl p-6 sm:p-8 text-center shadow-2xl">
+      <div class="w-16 h-16 mx-auto rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/40 flex items-center justify-center text-3xl mb-3">
         <i class="fa-solid fa-ticket-simple"></i>
       </div>
-      <h2 class="font-teko text-5xl font-bold uppercase text-white mb-2">Chit-Picking Round</h2>
-      <p class="text-sm text-slate-300 max-w-md mx-auto mb-6">
-        Round 2 is complete. Any remaining unsold players are being randomly drafted into franchises at <strong class="text-purple-400">0 Points</strong> via chit picking.
+      <h2 class="font-teko text-5xl font-bold uppercase text-white leading-none mb-1">Chit-Picking Round</h2>
+      <p class="text-xs text-slate-400 max-w-md mx-auto mb-5">
+        Round 2 is complete. Unsold players are allocated to franchises via transparent randomized chit draw at <strong class="text-purple-300">0 Points</strong>.
       </p>
-      <div id="lotteryCurrentPickBanner" class="p-4 bg-slate-950 border border-slate-800 rounded-2xl mb-8">
-        <span class="text-xs text-slate-400 uppercase font-bold block mb-1">Chit Pick Status</span>
-        <div id="lotteryDraftText" class="font-teko text-3xl text-purple-300">Ready to Pick Chits</div>
+
+      <!-- Transparent Pick Announcement Card -->
+      <div id="chitPickDisplayBox" class="bg-slate-950 border border-purple-500/50 rounded-2xl p-5 mb-6 relative overflow-hidden">
+        <span id="chitTurnBadge" class="px-3 py-1 rounded-full text-[11px] font-bold uppercase bg-purple-500/20 text-purple-300 border border-purple-500/30 tracking-widest inline-block mb-3">
+          Drawing Chit for Royal Challenger Retainers
+        </span>
+        
+        <div id="chitPlayerCard" class="flex flex-col sm:flex-row items-center justify-center gap-4 py-2">
+          <div class="w-24 h-24 rounded-xl border-2 border-purple-400 overflow-hidden bg-slate-900 shrink-0">
+            <img id="chitPlayerImg" src="" alt="Chit Player" class="w-full h-full object-cover" style="object-position: center 20%;" onerror="this.src='https://placehold.co/200x200/1e293b/a855f7?text=Player'" />
+          </div>
+          <div class="text-center sm:text-left">
+            <div id="chitPlayerName" class="font-teko text-4xl font-bold text-white uppercase leading-none">Ready for Draw</div>
+            <div id="chitPlayerRole" class="text-xs text-slate-400 font-medium">Press Draw to Pick from Bowl</div>
+            <div id="chitAllocationBadge" class="mt-2 text-xs font-bold text-emerald-400 uppercase hidden">
+              <i class="fa-solid fa-check-circle"></i> Allocated for 0 Pts
+            </div>
+          </div>
+        </div>
       </div>
-      <div id="lotteryAdminAction" class="hidden flex justify-center gap-4">
-        <button onclick="handleDraftLotteryStep()" class="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-teko text-2xl font-bold uppercase rounded-xl shadow-lg transition">
-          <i class="fa-solid fa-dice mr-2"></i> Pick Next Chit
+
+      <div class="flex items-center justify-between text-xs text-slate-400 px-3 py-2 bg-slate-950/70 border border-slate-800 rounded-xl mb-6">
+        <span>Chits Remaining in Bowl: <strong id="chitRemainingCount" class="text-purple-400 font-mono text-sm">0</strong></span>
+        <span class="text-[11px] text-slate-500 font-mono">Created by ARYAN SRIVASTAVA</span>
+      </div>
+
+      <div id="lotteryAdminAction" class="hidden flex justify-center gap-3">
+        <button onclick="handleDraftLotteryStep()" class="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-teko text-2xl font-bold uppercase rounded-xl shadow-lg transition active:scale-95 flex items-center gap-2">
+          <i class="fa-solid fa-dice"></i> Pick Next Chit
         </button>
         <button onclick="handleDraftLotteryAuto()" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-purple-300 font-teko text-2xl font-bold uppercase rounded-xl border border-purple-500/30 shadow-lg transition">
           Auto-Pick All Remaining
         </button>
       </div>
-      <div id="lotteryWaitingNote" class="text-xs text-slate-500 italic">Chits are being drawn by the Auctioneer...</div>
+      <div id="lotteryWaitingNote" class="text-xs text-slate-500 italic">Chits are being drawn live by the Auctioneer...</div>
     </div>
 
     <!-- Final Roster Summary View -->
     <div id="concludedView" class="hidden w-full flex flex-col gap-6">
       
-      <!-- Finale Banner with PDF Export -->
+      <!-- Finale Banner with PDF Export & Credit -->
       <div class="bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-black p-6 rounded-2xl shadow-2xl flex flex-wrap items-center justify-between gap-4">
         <div>
           <div class="text-xs font-bold uppercase tracking-widest text-black/80 flex items-center gap-1.5">
@@ -325,7 +432,7 @@
           <h2 class="font-teko text-5xl font-bold uppercase tracking-wider leading-none mt-1 text-black">
             Auction Concluded • Final Squads
           </h2>
-          <p class="text-xs font-medium text-black/80 mt-1">All 3 rounds completed. Download the official roster PDF below.</p>
+          <p class="text-xs font-medium text-black/80 mt-1">All 3 rounds completed. Download the official roster PDF below. • <span class="font-bold">Created by ARYAN SRIVASTAVA</span></p>
         </div>
         <div class="flex items-center gap-3">
           <button onclick="generateRosterPDF()" class="bg-black hover:bg-slate-900 text-amber-400 px-5 py-3 rounded-xl text-sm font-bold uppercase tracking-wider flex items-center gap-2 shadow-2xl transition border border-amber-400/40">
@@ -345,7 +452,10 @@
           <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
             <div class="flex items-center gap-2">
               <span class="w-4 h-4 rounded-full bg-blue-500"></span>
-              <h3 class="font-teko text-3xl font-bold uppercase text-white">Super Kings</h3>
+              <div>
+                <h3 class="font-teko text-3xl font-bold uppercase text-white leading-none">Royal Challenger Retainers</h3>
+                <span class="text-[10px] text-blue-400 font-medium">Capt: Abhigyan Prakash</span>
+              </div>
             </div>
             <span id="finalCount1" class="text-xs font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">0 Players</span>
           </div>
@@ -367,7 +477,10 @@
           <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
             <div class="flex items-center gap-2">
               <span class="w-4 h-4 rounded-full bg-amber-500"></span>
-              <h3 class="font-teko text-3xl font-bold uppercase text-white">Royal Challengers</h3>
+              <div>
+                <h3 class="font-teko text-3xl font-bold uppercase text-white leading-none">Crown Crushers</h3>
+                <span class="text-[10px] text-amber-400 font-medium">Capt: Mourya Podapati</span>
+              </div>
             </div>
             <span id="finalCount2" class="text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">0 Players</span>
           </div>
@@ -389,7 +502,10 @@
           <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
             <div class="flex items-center gap-2">
               <span class="w-4 h-4 rounded-full bg-emerald-500"></span>
-              <h3 class="font-teko text-3xl font-bold uppercase text-white">Mumbai Titans</h3>
+              <div>
+                <h3 class="font-teko text-3xl font-bold uppercase text-white leading-none">Enamel Warriors</h3>
+                <span class="text-[10px] text-emerald-400 font-medium">Capt: Sayan Biswas</span>
+              </div>
             </div>
             <span id="finalCount3" class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">0 Players</span>
           </div>
@@ -411,6 +527,11 @@
 
   </main>
 
+  <!-- Page Footer -->
+  <footer class="w-full bg-slate-950/80 border-t border-slate-900 py-2.5 px-4 text-center text-[11px] text-slate-500">
+    Blitz Lite Auction Engine • Powered by Firebase RTDB • <span class="text-slate-400 font-medium">Created by ARYAN SRIVASTAVA</span>
+  </footer>
+
   <!-- Share Links Modal (Auctioneer only) -->
   <div id="shareModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
@@ -418,18 +539,18 @@
         <h3 class="font-teko text-2xl font-bold text-white uppercase">Share Direct Links</h3>
         <button onclick="toggleShareModal(false)" class="text-slate-400 text-lg">&times;</button>
       </div>
-      <p class="text-xs text-slate-400 mb-3">Share these direct links with your captains and the TV screen.</p>
+      <p class="text-xs text-slate-400 mb-3">Share these direct links with your captains and the main projector screen.</p>
       <div class="space-y-2 text-xs">
         <div>
-          <span class="text-blue-400 font-bold block mb-1">Team 1 Link (Super Kings)</span>
+          <span class="text-blue-400 font-bold block mb-1">Team 1 Link (Royal Challenger Retainers - Abhigyan)</span>
           <input id="shareLink1" readonly class="w-full bg-slate-950 border border-slate-800 p-2 rounded text-[11px]" />
         </div>
         <div>
-          <span class="text-amber-400 font-bold block mb-1">Team 2 Link (Royal Challengers)</span>
+          <span class="text-amber-400 font-bold block mb-1">Team 2 Link (Crown Crushers - Mourya)</span>
           <input id="shareLink2" readonly class="w-full bg-slate-950 border border-slate-800 p-2 rounded text-[11px]" />
         </div>
         <div>
-          <span class="text-emerald-400 font-bold block mb-1">Team 3 Link (Mumbai Titans)</span>
+          <span class="text-emerald-400 font-bold block mb-1">Team 3 Link (Enamel Warriors - Sayan)</span>
           <input id="shareLink3" readonly class="w-full bg-slate-950 border border-slate-800 p-2 rounded text-[11px]" />
         </div>
         <div>
@@ -469,14 +590,24 @@
       return Date.now() + serverTimeOffset;
     }
 
+    // Direct Google Drive direct image streaming thumbnail
     function formatDrivePhotoUrl(rawUrl) {
       if (!rawUrl) return '';
       const match = rawUrl.match(/[-\w]{25,}/);
       if (!match) return rawUrl;
-      return `https://lh3.googleusercontent.com/d/${match[0]}=w800`;
+      return `https://drive.google.com/thumbnail?id=${match[0]}&sz=w800`;
     }
 
-    // INITIAL 24 PLAYERS FROM SPREADSHEET (ROUND 1 BASE PRICE = 2)
+    function handlePhotoError() {
+      const imgEl = document.getElementById('playerPhotoImg');
+      const placeholderEl = document.getElementById('photoPlaceholderIcon');
+      if (imgEl && placeholderEl) {
+        imgEl.classList.add('hidden');
+        placeholderEl.classList.remove('hidden');
+      }
+    }
+
+    // FULL LIVE PLAYER ROSTER (28 PLAYERS PARSED FROM GOOGLE SHEET)
     const INITIAL_PLAYERS = [
       { id: 1, name: "Rishu kumar", role: "Batter", photo: "https://drive.google.com/open?id=15lYHfG1MirLcp2rkEYNpeXlUlgrVtgFz", basePrice: 2 },
       { id: 2, name: "Intekhab", role: "Allrounder", photo: "https://drive.google.com/open?id=1HnFxNymxaIet1cz_3F4FG4TAiFEAU0WK", basePrice: 2 },
@@ -485,23 +616,27 @@
       { id: 5, name: "Sanket Jana", role: "Batter", photo: "https://drive.google.com/open?id=1ndBZ7Jph_Ke7xy448h9l6vuzxQfyPxQt", basePrice: 2 },
       { id: 6, name: "Sayan Roy", role: "Allrounder", photo: "https://drive.google.com/open?id=1NYYtuNlr3L9L-VfFlZLATRk5egx1LsD0", basePrice: 2 },
       { id: 7, name: "Anshika trivedi", role: "Batter", photo: "https://drive.google.com/open?id=1cpnBendSxmZnVJ4zqc--zCfYqSVRfcGG", basePrice: 2 },
-      { id: 8, name: "Sayan Biswas", role: "Allrounder", photo: "https://drive.google.com/open?id=1L3ymaLt5GiVGIMb87UFqXZDRxgBYsPhV", basePrice: 2 },
-      { id: 9, name: "Abhigyan Prakash", role: "Allrounder", photo: "https://drive.google.com/open?id=1dNjjyIVfKlzpiBse0Iq3OE6jM3OxKIKX", basePrice: 2 },
-      { id: 10, name: "Kabir Puri", role: "Bowler", photo: "https://drive.google.com/open?id=1_R9Q6S34yF8FpEhr_hN4yMzOLBIAFkba", basePrice: 2 },
-      { id: 11, name: "Pragya Sharma", role: "Allrounder", photo: "https://drive.google.com/open?id=1M1qJ7inp4S-XISXyrTfBkucZsd2eDmE8", basePrice: 2 },
-      { id: 12, name: "Varsha HM", role: "Bowler", photo: "https://drive.google.com/open?id=1OMDuiwMeis3MJOZZSJ9mzxCK7IXt0q6z", basePrice: 2 },
-      { id: 13, name: "Vishnu priya", role: "Allrounder", photo: "https://drive.google.com/open?id=1gc-s7ZxNnj7HuykYdGZ72ZLRzn1MPuZn", basePrice: 2 },
-      { id: 14, name: "Chirag Panjwani", role: "Batter", photo: "https://drive.google.com/open?id=1dJKDjhM01L4_TqIg0AEsZwzMBqutxw7f", basePrice: 2 },
-      { id: 15, name: "Md Refatullah", role: "Allrounder", photo: "https://drive.google.com/open?id=1VrwACdFMkOZZg7QEIH23NbIR51SWe7Qm", basePrice: 2 },
-      { id: 16, name: "Raghav goel", role: "Allrounder", photo: "https://drive.google.com/open?id=1qVOCnx0Pj4SAiBP941fUMq2aq9dSWUzm", basePrice: 2 },
-      { id: 17, name: "Sparsh", role: "Batter", photo: "https://drive.google.com/open?id=1O6-J256d0FUoQekWZJLE0XGv1jnZOQzR", basePrice: 2 },
-      { id: 18, name: "Hammad Karim", role: "Allrounder", photo: "https://drive.google.com/open?id=1oG7_hWcgccC83i_zAm66bgolLm7DE1jv", basePrice: 2 },
-      { id: 19, name: "Serah Santimano", role: "Batter", photo: "https://drive.google.com/open?id=1HY0JLXvB60Hpskonz6mJGfrqJLOo2lkC", basePrice: 2 },
-      { id: 20, name: "Vedant sharma", role: "Batter", photo: "https://drive.google.com/open?id=1FoIZZ9sHajk5DqnbTOwvsEt53zCT3YO0", basePrice: 2 },
-      { id: 21, name: "Nitya", role: "Allrounder", photo: "https://drive.google.com/open?id=1XKWfCUu5PL0lzLOiYaocw_T4EilY1TgP", basePrice: 2 },
-      { id: 22, name: "Esha Srivastava", role: "Allrounder", photo: "https://drive.google.com/open?id=1te3dRPeENZggWlO8j5sXAE2wD8GYKbOw", basePrice: 2 },
-      { id: 23, name: "KS Sharvani", role: "Batter", photo: "https://drive.google.com/open?id=1J7Bn6XM92sCq5WjcsV1lsEk18nJWFZD_", basePrice: 2 },
-      { id: 24, name: "Hardik gaba", role: "Batter", photo: "https://drive.google.com/open?id=1wyvp_DouU_CHJFwfCp5QGvZCtjmwLVDx", basePrice: 2 }
+      { id: 8, name: "Kabir Puri", role: "Bowler", photo: "https://drive.google.com/open?id=1_R9Q6S34yF8FpEhr_hN4yMzOLBIAFkba", basePrice: 2 },
+      { id: 9, name: "Pragya Sharma", role: "Allrounder", photo: "https://drive.google.com/open?id=1M1qJ7inp4S-XISXyrTfBkucZsd2eDmE8", basePrice: 2 },
+      { id: 10, name: "Varsha HM", role: "Bowler", photo: "https://drive.google.com/open?id=1OMDuiwMeis3MJOZZSJ9mzxCK7IXt0q6z", basePrice: 2 },
+      { id: 11, name: "Vishnu priya", role: "Allrounder", photo: "https://drive.google.com/open?id=1gc-s7ZxNnj7HuykYdGZ72ZLRzn1MPuZn", basePrice: 2 },
+      { id: 12, name: "Chirag Panjwani", role: "Batter", photo: "https://drive.google.com/open?id=1dJKDjhM01L4_TqIg0AEsZwzMBqutxw7f", basePrice: 2 },
+      { id: 13, name: "Raghav goel", role: "Allrounder", photo: "https://drive.google.com/open?id=1qVOCnx0Pj4SAiBP941fUMq2aq9dSWUzm", basePrice: 2 },
+      { id: 14, name: "Sparsh", role: "Batter", photo: "https://drive.google.com/open?id=1O6-J256d0FUoQekWZJLE0XGv1jnZOQzR", basePrice: 2 },
+      { id: 15, name: "Hammad Karim", role: "Allrounder", photo: "https://drive.google.com/open?id=1oG7_hWcgccC83i_zAm66bgolLm7DE1jv", basePrice: 2 },
+      { id: 16, name: "Vedant sharma", role: "Batter", photo: "https://drive.google.com/open?id=1FoIZZ9sHajk5DqnbTOwvsEt53zCT3YO0", basePrice: 2 },
+      { id: 17, name: "Nitya", role: "Allrounder", photo: "https://drive.google.com/open?id=1XKWfCUu5PL0lzLOiYaocw_T4EilY1TgP", basePrice: 2 },
+      { id: 18, name: "Esha Srivastava", role: "Allrounder", photo: "https://drive.google.com/open?id=1te3dRPeENZggWlO8j5sXAE2wD8GYKbOw", basePrice: 2 },
+      { id: 19, name: "KS Sharvani", role: "Batter", photo: "https://drive.google.com/open?id=1J7Bn6XM92sCq5WjcsV1lsEk18nJWFZD_", basePrice: 2 },
+      { id: 20, name: "Hardik gaba", role: "Batter", photo: "https://drive.google.com/open?id=1wyvp_DouU_CHJFwfCp5QGvZCtjmwLVDx", basePrice: 2 },
+      { id: 21, name: "Md Refatullah", role: "Allrounder", photo: "https://drive.google.com/open?id=1U2u_iAV3Td6cc-2M0glQWWBUnF2S3QO5", basePrice: 2 },
+      { id: 22, name: "Priyanshu Saran", role: "Allrounder", photo: "https://drive.google.com/open?id=1NgS1eaMFAD-l7tYA91QMfJxl5-F9f04L", basePrice: 2 },
+      { id: 23, name: "Prarambh Chaturvedi", role: "Batter", photo: "https://drive.google.com/open?id=11TFLiG1QH5XIMT0J-bNoGqc1y37VyQuv", basePrice: 2 },
+      { id: 24, name: "Kathleen Amanda", role: "Allrounder", photo: "https://drive.google.com/open?id=1VRMr7Rwjcv9sHJNrG0Pf4bhTgmXA7sMU", basePrice: 2 },
+      { id: 25, name: "Satyam", role: "Batter", photo: "https://drive.google.com/open?id=1Mkp0dNSYAbLh81-VR6UEtml3O4PpV0HR", basePrice: 2 },
+      { id: 26, name: "Arunava Giri", role: "Allrounder", photo: "https://drive.google.com/open?id=1qBnkgie9HXC369SasGeXRVPW81TnGHcX", basePrice: 2 },
+      { id: 27, name: "Rishav hisariya", role: "Batter", photo: "https://drive.google.com/open?id=13rXh1h6LNC6-NiO0S9-WwimLx0eELsAI", basePrice: 2 },
+      { id: 28, name: "Nihar sonowal", role: "Batter", photo: "https://drive.google.com/open?id=1cs48ysWFJ4n0QCi5fOPUytmI3sdDFM4V", basePrice: 2 }
     ];
 
     function getDefaultState() {
@@ -511,20 +646,22 @@
         currentBid: 2,
         leadingTeam: null,
         lastAction: "INIT",
-        phase: "ROUND1", // "ROUND1", "UNSOLD_SPLASH", "ROUND2_UNSOLD", "DRAFT_LOTTERY", "CONCLUDED"
+        phase: "PRE_AUCTION", // "PRE_AUCTION", "ROUND1", "UNSOLD_SPLASH", "ROUND2_UNSOLD", "DRAFT_LOTTERY", "CONCLUDED"
         unsoldPool: [],
         chitPool: [],
+        lastChitDrawn: null,
+        chitTurnTeamKey: "team1",
         timerDuration: 20,
         timerEndsAt: now + 20000,
         timerIsPaused: false,
         timerRemainingPaused: 20000,
         players: INITIAL_PLAYERS,
         teams: {
-          team1: { name: "Super Kings", purse: 100, squad: [] },
-          team2: { name: "Royal Challengers", purse: 100, squad: [] },
-          team3: { name: "Mumbai Titans", purse: 100, squad: [] }
+          team1: { name: "Royal Challenger Retainers", captain: "Abhigyan Prakash", purse: 100, squad: [] },
+          team2: { name: "Crown Crushers", captain: "Mourya Podapati", purse: 100, squad: [] },
+          team3: { name: "Enamel Warriors", captain: "Sayan Biswas", purse: 100, squad: [] }
         },
-        logs: ["Auction arena connected via Firebase."]
+        logs: ["Arena initialized. Blitz Lite rules briefing active."]
       };
     }
 
@@ -534,7 +671,6 @@
     let lastSecondTickPlayed = -1;
     let isAutoResolving = false;
     let hasCelebratedFinale = false;
-    const smartCropCache = {};
 
     // Web Audio Synthesizer
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -628,45 +764,21 @@
       auctionRef.set(appState);
     }
 
-    // --- Smartcrop.js 1:1 Face & Content Aware Processor ---
-    function processSmartCrop(imgUrl, cacheKey, callback) {
-      if (smartCropCache[cacheKey]) {
-        callback(smartCropCache[cacheKey]);
-        return;
-      }
-
-      const tempImg = new Image();
-      tempImg.crossOrigin = "anonymous";
-      tempImg.onload = function() {
-        if (typeof smartcrop !== "undefined") {
-          smartcrop.crop(tempImg, { width: 300, height: 300, minScale: 1.0 })
-            .then(result => {
-              const crop = result.topCrop;
-              const canvas = document.createElement("canvas");
-              canvas.width = 300;
-              canvas.height = 300;
-              const ctx = canvas.getContext("2d");
-              ctx.drawImage(tempImg, crop.x, crop.y, crop.width, crop.height, 0, 0, 300, 300);
-              const dataUrl = canvas.toDataURL();
-              smartCropCache[cacheKey] = dataUrl;
-              callback(dataUrl);
-            })
-            .catch(() => {
-              callback(imgUrl);
-            });
-        } else {
-          callback(imgUrl);
-        }
-      };
-      tempImg.onerror = function() {
-        callback(imgUrl);
-      };
-      tempImg.src = imgUrl;
+    // --- Start Live Auction from Rules Splash Screen ---
+    function handleStartLiveAuction() {
+      if (currentRole !== 'admin' || !appState) return;
+      appState.phase = "ROUND1";
+      appState.currentLotIndex = 0;
+      appState.currentBid = 2;
+      appState.leadingTeam = null;
+      appState.timerEndsAt = getSyncedNow() + 20000;
+      appState.timerIsPaused = false;
+      saveState("AUCTION_OPENED", "Round 1 officially opened by Auctioneer!");
     }
 
-    // --- Precise Server-Synced Timer & Auto-Hammer Engine ---
+    // --- Precise Server-Synced Timer Engine ---
     setInterval(() => {
-      if (!appState || !appState.players || appState.phase === 'UNSOLD_SPLASH' || appState.phase === 'DRAFT_LOTTERY' || appState.phase === 'CONCLUDED') return;
+      if (!appState || !appState.players || appState.phase === 'PRE_AUCTION' || appState.phase === 'UNSOLD_SPLASH' || appState.phase === 'DRAFT_LOTTERY' || appState.phase === 'CONCLUDED') return;
       if (appState.currentLotIndex >= appState.players.length) return;
 
       const timerContainer = document.getElementById("timerContainer");
@@ -773,7 +885,6 @@
       const squadCount = (team.squad || []).length;
       const targetSquad = 8;
       const futureSlots = Math.max(0, targetSquad - (squadCount + 1));
-      // Base reservation: 2 pts during R1, 1 pt during R2
       const reservePerSlot = (appState.phase === "ROUND2_UNSOLD") ? 1 : 2;
       const reserved = futureSlots * reservePerSlot;
       return Math.max(0, team.purse - reserved);
@@ -833,6 +944,7 @@
       if (appState.phase === "ROUND2_UNSOLD" && appState.currentLotIndex >= appState.players.length) {
         if (appState.chitPool && appState.chitPool.length > 0) {
           appState.phase = "DRAFT_LOTTERY";
+          appState.chitTurnTeamKey = "team1";
           saveState("LOTTERY_TRIGGERED", "Round 2 concluded! Entering Chit-Picking Round for unsold players.");
           return;
         } else {
@@ -882,13 +994,10 @@
 
       const logMsg = `UNSOLD: ${player.name} passed.`;
       
-      // If passing in Round 1 -> enters unsold pool for Round 2
       if (appState.phase === "ROUND1") {
         if (!appState.unsoldPool) appState.unsoldPool = [];
         appState.unsoldPool.push(player);
-      } 
-      // If passing in Round 2 -> enters chit pool for Chit-Picking Round
-      else if (appState.phase === "ROUND2_UNSOLD") {
+      } else if (appState.phase === "ROUND2_UNSOLD") {
         if (!appState.chitPool) appState.chitPool = [];
         appState.chitPool.push(player);
       }
@@ -897,11 +1006,9 @@
       saveState("UNSOLD", logMsg);
     }
 
-    // Commence Round 2 (Base price = 1 Pt for every player)
     function handleCommenceUnsoldRound() {
       if (currentRole !== 'admin' || !appState) return;
       
-      // Load unsold players into active roster with basePrice = 1
       appState.players = (appState.unsoldPool || []).map(p => ({
         ...p,
         basePrice: 1
@@ -920,7 +1027,7 @@
       saveState("ROUND2_START", "Round 2 has commenced! Base price is now 1 Pt.");
     }
 
-    // --- Chit-Picking / Draft Lottery Round (Round 3) Logic ---
+    // --- Transparent Chit-Picking Round (Round 3) Logic ---
     function handleDraftLotteryStep() {
       if (currentRole !== 'admin' || !appState) return;
       if (!appState.chitPool || appState.chitPool.length === 0) {
@@ -929,16 +1036,16 @@
         return;
       }
 
-      // Sort teams to award to the team with the smallest squad count first
+      // Determine which team draws next based on smallest squad size
       const teamsArr = ['team1', 'team2', 'team3'];
       teamsArr.sort((a, b) => (appState.teams[a].squad.length || 0) - (appState.teams[b].squad.length || 0));
-      const chosenTeamKey = teamsArr[0];
+      const targetTeamKey = teamsArr[0];
 
-      // Pick random player from the chit pool
+      // Draw random chit
       const randIdx = Math.floor(Math.random() * appState.chitPool.length);
       const chosenPlayer = appState.chitPool.splice(randIdx, 1)[0];
 
-      appState.teams[chosenTeamKey].squad.push({
+      appState.teams[targetTeamKey].squad.push({
         id: chosenPlayer.id,
         name: chosenPlayer.name,
         role: chosenPlayer.role,
@@ -947,9 +1054,25 @@
         lottery: true
       });
 
-      const logMsg = `CHIT DRAWN: ${chosenPlayer.name} allocated to ${appState.teams[chosenTeamKey].name} (0 Pts)`;
+      appState.lastChitDrawn = {
+        player: chosenPlayer,
+        teamKey: targetTeamKey,
+        teamName: appState.teams[targetTeamKey].name
+      };
+
+      // Set up next team in turn
+      const nextTeamsArr = ['team1', 'team2', 'team3'];
+      nextTeamsArr.sort((a, b) => (appState.teams[a].squad.length || 0) - (appState.teams[b].squad.length || 0));
+      appState.chitTurnTeamKey = nextTeamsArr[0];
+
+      const logMsg = `CHIT DRAWN: ${chosenPlayer.name} allocated to ${appState.teams[targetTeamKey].name} (0 Pts)`;
       if (appState.chitPool.length === 0) {
-        appState.phase = "CONCLUDED";
+        setTimeout(() => {
+          if (appState && appState.phase === "DRAFT_LOTTERY") {
+            appState.phase = "CONCLUDED";
+            saveState("CONCLUDED", "Chit-picking complete! All squads filled.");
+          }
+        }, 3500);
       }
       saveState("LOTTERY_PICK", logMsg);
     }
@@ -962,7 +1085,7 @@
     }
 
     function resetAuction() {
-      if (confirm("Reset the entire Blitz Lite auction? All state will return to Round 1.")) {
+      if (confirm("Reset the entire Blitz Lite auction? State will return to the pre-auction briefing.")) {
         hasCelebratedFinale = false;
         auctionRef.set(getDefaultState());
       }
@@ -979,9 +1102,9 @@
       doc.text("BLITZ LITE - OFFICIAL SQUAD ROSTERS", 40, 50);
 
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
-      doc.text(`Generated on: ${new Date().toLocaleString()} | Manipal College of Dental Sciences`, 40, 68);
+      doc.setFontSize(9);
+      doc.setTextColor(90, 90, 90);
+      doc.text(`Generated on: ${new Date().toLocaleString()} | Created by ARYAN SRIVASTAVA`, 40, 68);
 
       let currentY = 95;
 
@@ -991,9 +1114,12 @@
         const totalSpent = squad.reduce((sum, p) => sum + (p.price || 0), 0);
 
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(13);
+        doc.setFontSize(12);
         doc.setTextColor(30, 30, 30);
-        doc.text(`${team.name.toUpperCase()} (Total Spent: ${totalSpent} Pts | Purse Left: ${team.purse} Pts)`, 40, currentY);
+        doc.text(`${team.name.toUpperCase()} (Captain: ${team.captain})`, 40, currentY);
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Spent: ${totalSpent} Pts | Purse Left: ${team.purse} Pts | Squad Count: ${squad.length}`, 40, currentY + 12);
 
         const rows = squad.map((p, idx) => [
           idx + 1,
@@ -1003,17 +1129,21 @@
         ]);
 
         doc.autoTable({
-          startY: currentY + 8,
+          startY: currentY + 18,
           head: [["#", "Player Name", "Role", "Sold Price"]],
           body: rows.length > 0 ? rows : [["-", "No players acquired", "-", "-"]],
           theme: "grid",
           headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: "bold" },
-          styles: { fontSize: 9, cellPadding: 5 },
+          styles: { fontSize: 9, cellPadding: 4.5 },
           margin: { left: 40, right: 40 }
         });
 
-        currentY = doc.lastAutoTable.finalY + 25;
+        currentY = doc.lastAutoTable.finalY + 22;
       });
+
+      doc.setFontSize(8);
+      doc.setTextColor(140, 140, 140);
+      doc.text("Blitz Lite Live Auction System • Created by ARYAN SRIVASTAVA", 40, 810);
 
       doc.save("Blitz_Lite_Official_Rosters.pdf");
     }
@@ -1032,7 +1162,11 @@
         resetBtn.classList.remove('hidden');
         adminLinksBtn.classList.remove('hidden');
       } else if (['team1', 'team2', 'team3'].includes(currentRole)) {
-        const teamNameMap = { team1: "Super Kings", team2: "Royal Challengers", team3: "Mumbai Titans" };
+        const teamNameMap = { 
+          team1: "Royal Challenger Retainers", 
+          team2: "Crown Crushers", 
+          team3: "Enamel Warriors" 
+        };
         const tName = (appState && appState.teams && appState.teams[currentRole]) ? appState.teams[currentRole].name : teamNameMap[currentRole];
         badge.innerHTML = `<i class="fa-solid fa-hand text-amber-400"></i> <span class="text-amber-300">${tName}</span>`;
         adminConsole.classList.add('hidden');
@@ -1064,6 +1198,7 @@
     }
 
     function renderFinalRosters() {
+      document.getElementById("preAuctionSplashView").classList.add("hidden");
       document.getElementById("activeAuctionView").classList.add("hidden");
       document.getElementById("unsoldSplashView").classList.add("hidden");
       document.getElementById("lotterySplashView").classList.add("hidden");
@@ -1112,7 +1247,31 @@
     function renderUI() {
       if (!appState) return;
 
-      // Phase 1: Unsold Splash Screen (Transition to Round 2)
+      // Phase 0: Pre-Auction Rules Splash
+      if (appState.phase === "PRE_AUCTION") {
+        document.getElementById("preAuctionSplashView").classList.remove("hidden");
+        document.getElementById("activeAuctionView").classList.add("hidden");
+        document.getElementById("unsoldSplashView").classList.add("hidden");
+        document.getElementById("lotterySplashView").classList.add("hidden");
+        document.getElementById("concludedView").classList.add("hidden");
+
+        const adminBtnCont = document.getElementById("preAuctionAdminBtnContainer");
+        const waitingNote = document.getElementById("preAuctionWaitingNote");
+
+        if (currentRole === 'admin') {
+          adminBtnCont.classList.remove("hidden");
+          waitingNote.classList.add("hidden");
+        } else {
+          adminBtnCont.classList.add("hidden");
+          waitingNote.classList.remove("hidden");
+        }
+        return;
+      }
+
+      // Hide Pre-Auction Screen once started
+      document.getElementById("preAuctionSplashView").classList.add("hidden");
+
+      // Phase 1: Unsold Splash Screen (Round 2 Prep)
       if (appState.phase === "UNSOLD_SPLASH") {
         document.getElementById("activeAuctionView").classList.add("hidden");
         document.getElementById("concludedView").classList.add("hidden");
@@ -1132,7 +1291,7 @@
         return;
       }
 
-      // Phase 2: Chit-Picking Round (Round 3)
+      // Phase 2: Transparent Chit-Picking Round (Round 3)
       if (appState.phase === "DRAFT_LOTTERY") {
         document.getElementById("activeAuctionView").classList.add("hidden");
         document.getElementById("concludedView").classList.add("hidden");
@@ -1140,7 +1299,18 @@
         document.getElementById("lotterySplashView").classList.remove("hidden");
 
         const remainingCount = (appState.chitPool || []).length;
-        document.getElementById("lotteryDraftText").textContent = `${remainingCount} Unsold Players in Chit Bowl`;
+        document.getElementById("chitRemainingCount").textContent = remainingCount;
+
+        const nextTeam = appState.teams[appState.chitTurnTeamKey || 'team1'];
+        document.getElementById("chitTurnBadge").textContent = `Current Draw Turn: ${nextTeam ? nextTeam.name : 'Next Team'}`;
+
+        if (appState.lastChitDrawn && appState.lastChitDrawn.player) {
+          const lp = appState.lastChitDrawn.player;
+          document.getElementById("chitPlayerName").textContent = lp.name;
+          document.getElementById("chitPlayerRole").textContent = `${lp.role} • Allocated to ${appState.lastChitDrawn.teamName}`;
+          document.getElementById("chitPlayerImg").src = formatDrivePhotoUrl(lp.photo);
+          document.getElementById("chitAllocationBadge").classList.remove("hidden");
+        }
 
         if (currentRole === 'admin') {
           document.getElementById("lotteryAdminAction").classList.remove("hidden");
@@ -1158,7 +1328,7 @@
         return;
       }
 
-      // Phase 4: Standard Active Bidding
+      // Phase 4: Standard Active Bidding Arena
       document.getElementById("activeAuctionView").classList.remove("hidden");
       document.getElementById("concludedView").classList.add("hidden");
       document.getElementById("unsoldSplashView").classList.add("hidden");
@@ -1184,18 +1354,14 @@
       document.getElementById('playerBasePrice').textContent = `${isRound2 ? 1 : 2} Pts`;
       document.getElementById('playerCurrentBid').textContent = `${appState.currentBid} Pts`;
 
-      // Smartcrop Face-Processing for Image
+      // Direct Streaming Image Update
       const imgEl = document.getElementById('playerPhotoImg');
       const placeholderEl = document.getElementById('photoPlaceholderIcon');
 
       if (player.photo) {
         placeholderEl.classList.add('hidden');
         imgEl.classList.remove('hidden');
-        const formattedUrl = formatDrivePhotoUrl(player.photo);
-
-        processSmartCrop(formattedUrl, `player_${player.id}`, (croppedUrl) => {
-          imgEl.src = croppedUrl;
-        });
+        imgEl.src = formatDrivePhotoUrl(player.photo);
       } else {
         imgEl.classList.add('hidden');
         placeholderEl.classList.remove('hidden');
