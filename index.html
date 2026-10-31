@@ -25,6 +25,14 @@
       50% { border-color: rgba(239, 68, 68, 0.3); box-shadow: 0 0 5px rgba(239, 68, 68, 0.1); }
     }
     .urgent-timer { animation: urgentPulse 0.8s infinite; }
+    
+    /* Tight 1:1 Headshot Zoom */
+    .face-zoom {
+      object-fit: cover;
+      object-position: center 15%;
+      transform: scale(1.35);
+      transform-origin: center 20%;
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans justify-between">
@@ -62,7 +70,7 @@
     </div>
   </header>
 
-  <!-- Main Content -->
+  <!-- Main Content Area -->
   <main class="max-w-7xl mx-auto w-full p-4 lg:p-6 flex-1 flex flex-col justify-center">
 
     <!-- Splash Screen: Pre-Auction Rules & Information -->
@@ -160,15 +168,14 @@
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
-            <!-- 1:1 Headshot Display -->
+            <!-- 1:1 Headshot Display with Zoomed Face Framing -->
             <div class="sm:col-span-5 flex flex-col items-center justify-center p-3 bg-slate-950/70 border border-slate-800 rounded-2xl">
-              <div class="w-40 h-40 rounded-2xl border-4 border-amber-500/80 p-1 bg-slate-900 relative overflow-hidden shadow-lg flex items-center justify-center">
+              <div class="w-40 h-40 rounded-2xl border-4 border-amber-500/80 p-0.5 bg-slate-900 relative overflow-hidden shadow-lg flex items-center justify-center">
                 <img 
                   id="playerPhotoImg" 
                   src="" 
                   alt="Player Photo" 
-                  class="w-full h-full object-cover rounded-xl" 
-                  style="object-position: center 20%;"
+                  class="w-full h-full face-zoom rounded-xl transition-transform duration-300" 
                   onerror="handlePhotoError()"
                 />
                 <div id="photoPlaceholderIcon" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900">
@@ -182,7 +189,7 @@
 
             <div class="sm:col-span-7 flex flex-col justify-between h-full">
               <div>
-                <h2 id="playerName" class="font-teko text-5xl font-bold uppercase leading-none text-white">Rishu Kumar</h2>
+                <h2 id="playerName" class="font-teko text-5xl font-bold uppercase leading-none text-white">Player Name</h2>
                 <p id="playerSpecialty" class="text-xs text-slate-400 mt-1">Specialist Batter</p>
               </div>
 
@@ -289,7 +296,7 @@
               <span class="w-3.5 h-3.5 rounded-full bg-blue-500"></span>
               <div>
                 <span class="font-teko text-2xl font-bold text-white block leading-none">Royal Challenger Retainers</span>
-                <span class="text-[11px] text-blue-400 font-medium">Captain: Abhigyan Prakash</span>
+                <span class="text-[11px] text-blue-400 font-medium">Captain: Mourya Podapati</span>
               </div>
             </div>
             <span id="badgeLeader1" class="hidden text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 uppercase">Highest</span>
@@ -311,7 +318,7 @@
               <span class="w-3.5 h-3.5 rounded-full bg-amber-500"></span>
               <div>
                 <span class="font-teko text-2xl font-bold text-white block leading-none">Crown Crushers</span>
-                <span class="text-[11px] text-amber-400 font-medium">Captain: Mourya Podapati</span>
+                <span class="text-[11px] text-amber-400 font-medium">Captain: Abhigyan Prakash</span>
               </div>
             </div>
             <span id="badgeLeader2" class="hidden text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 uppercase">Highest</span>
@@ -392,7 +399,7 @@
         
         <div id="chitPlayerCard" class="flex flex-col sm:flex-row items-center justify-center gap-4 py-2">
           <div class="w-24 h-24 rounded-xl border-2 border-purple-400 overflow-hidden bg-slate-900 shrink-0">
-            <img id="chitPlayerImg" src="" alt="Chit Player" class="w-full h-full object-cover" style="object-position: center 20%;" onerror="this.src='https://placehold.co/200x200/1e293b/a855f7?text=Player'" />
+            <img id="chitPlayerImg" src="" alt="Chit Player" class="w-full h-full face-zoom" onerror="this.src='https://placehold.co/200x200/1e293b/a855f7?text=Player'" />
           </div>
           <div class="text-center sm:text-left">
             <div id="chitPlayerName" class="font-teko text-4xl font-bold text-white uppercase leading-none">Ready for Draw</div>
@@ -454,7 +461,7 @@
               <span class="w-4 h-4 rounded-full bg-blue-500"></span>
               <div>
                 <h3 class="font-teko text-3xl font-bold uppercase text-white leading-none">Royal Challenger Retainers</h3>
-                <span class="text-[10px] text-blue-400 font-medium">Capt: Abhigyan Prakash</span>
+                <span class="text-[10px] text-blue-400 font-medium">Capt: Mourya Podapati</span>
               </div>
             </div>
             <span id="finalCount1" class="text-xs font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">0 Players</span>
@@ -479,7 +486,7 @@
               <span class="w-4 h-4 rounded-full bg-amber-500"></span>
               <div>
                 <h3 class="font-teko text-3xl font-bold uppercase text-white leading-none">Crown Crushers</h3>
-                <span class="text-[10px] text-amber-400 font-medium">Capt: Mourya Podapati</span>
+                <span class="text-[10px] text-amber-400 font-medium">Capt: Abhigyan Prakash</span>
               </div>
             </div>
             <span id="finalCount2" class="text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">0 Players</span>
@@ -542,11 +549,11 @@
       <p class="text-xs text-slate-400 mb-3">Share these direct links with your captains and the main projector screen.</p>
       <div class="space-y-2 text-xs">
         <div>
-          <span class="text-blue-400 font-bold block mb-1">Team 1 Link (Royal Challenger Retainers - Abhigyan)</span>
+          <span class="text-blue-400 font-bold block mb-1">Team 1 Link (Royal Challenger Retainers - Mourya)</span>
           <input id="shareLink1" readonly class="w-full bg-slate-950 border border-slate-800 p-2 rounded text-[11px]" />
         </div>
         <div>
-          <span class="text-amber-400 font-bold block mb-1">Team 2 Link (Crown Crushers - Mourya)</span>
+          <span class="text-amber-400 font-bold block mb-1">Team 2 Link (Crown Crushers - Abhigyan)</span>
           <input id="shareLink2" readonly class="w-full bg-slate-950 border border-slate-800 p-2 rounded text-[11px]" />
         </div>
         <div>
@@ -607,40 +614,46 @@
       }
     }
 
-    // FULL LIVE PLAYER ROSTER (28 PLAYERS PARSED FROM GOOGLE SHEET)
-    const INITIAL_PLAYERS = [
-      { id: 1, name: "Rishu kumar", role: "Batter", photo: "https://drive.google.com/open?id=15lYHfG1MirLcp2rkEYNpeXlUlgrVtgFz", basePrice: 2 },
-      { id: 2, name: "Intekhab", role: "Allrounder", photo: "https://drive.google.com/open?id=1HnFxNymxaIet1cz_3F4FG4TAiFEAU0WK", basePrice: 2 },
-      { id: 3, name: "Saanvi Taneja", role: "Allrounder", photo: "https://drive.google.com/open?id=1mRREE4mxv9A0n070V34n-CWAU39WXZmK", basePrice: 2 },
-      { id: 4, name: "Arnesh Saha", role: "Allrounder", photo: "https://drive.google.com/open?id=1zMW4uCnzyFXsePi4h3ELJ46UjmUwGM-l", basePrice: 2 },
-      { id: 5, name: "Sanket Jana", role: "Batter", photo: "https://drive.google.com/open?id=1ndBZ7Jph_Ke7xy448h9l6vuzxQfyPxQt", basePrice: 2 },
-      { id: 6, name: "Sayan Roy", role: "Allrounder", photo: "https://drive.google.com/open?id=1NYYtuNlr3L9L-VfFlZLATRk5egx1LsD0", basePrice: 2 },
-      { id: 7, name: "Anshika trivedi", role: "Batter", photo: "https://drive.google.com/open?id=1cpnBendSxmZnVJ4zqc--zCfYqSVRfcGG", basePrice: 2 },
-      { id: 8, name: "Kabir Puri", role: "Bowler", photo: "https://drive.google.com/open?id=1_R9Q6S34yF8FpEhr_hN4yMzOLBIAFkba", basePrice: 2 },
-      { id: 9, name: "Pragya Sharma", role: "Allrounder", photo: "https://drive.google.com/open?id=1M1qJ7inp4S-XISXyrTfBkucZsd2eDmE8", basePrice: 2 },
-      { id: 10, name: "Varsha HM", role: "Bowler", photo: "https://drive.google.com/open?id=1OMDuiwMeis3MJOZZSJ9mzxCK7IXt0q6z", basePrice: 2 },
-      { id: 11, name: "Vishnu priya", role: "Allrounder", photo: "https://drive.google.com/open?id=1gc-s7ZxNnj7HuykYdGZ72ZLRzn1MPuZn", basePrice: 2 },
-      { id: 12, name: "Chirag Panjwani", role: "Batter", photo: "https://drive.google.com/open?id=1dJKDjhM01L4_TqIg0AEsZwzMBqutxw7f", basePrice: 2 },
-      { id: 13, name: "Raghav goel", role: "Allrounder", photo: "https://drive.google.com/open?id=1qVOCnx0Pj4SAiBP941fUMq2aq9dSWUzm", basePrice: 2 },
-      { id: 14, name: "Sparsh", role: "Batter", photo: "https://drive.google.com/open?id=1O6-J256d0FUoQekWZJLE0XGv1jnZOQzR", basePrice: 2 },
-      { id: 15, name: "Hammad Karim", role: "Allrounder", photo: "https://drive.google.com/open?id=1oG7_hWcgccC83i_zAm66bgolLm7DE1jv", basePrice: 2 },
-      { id: 16, name: "Vedant sharma", role: "Batter", photo: "https://drive.google.com/open?id=1FoIZZ9sHajk5DqnbTOwvsEt53zCT3YO0", basePrice: 2 },
-      { id: 17, name: "Nitya", role: "Allrounder", photo: "https://drive.google.com/open?id=1XKWfCUu5PL0lzLOiYaocw_T4EilY1TgP", basePrice: 2 },
-      { id: 18, name: "Esha Srivastava", role: "Allrounder", photo: "https://drive.google.com/open?id=1te3dRPeENZggWlO8j5sXAE2wD8GYKbOw", basePrice: 2 },
-      { id: 19, name: "KS Sharvani", role: "Batter", photo: "https://drive.google.com/open?id=1J7Bn6XM92sCq5WjcsV1lsEk18nJWFZD_", basePrice: 2 },
-      { id: 20, name: "Hardik gaba", role: "Batter", photo: "https://drive.google.com/open?id=1wyvp_DouU_CHJFwfCp5QGvZCtjmwLVDx", basePrice: 2 },
-      { id: 21, name: "Md Refatullah", role: "Allrounder", photo: "https://drive.google.com/open?id=1U2u_iAV3Td6cc-2M0glQWWBUnF2S3QO5", basePrice: 2 },
-      { id: 22, name: "Priyanshu Saran", role: "Allrounder", photo: "https://drive.google.com/open?id=1NgS1eaMFAD-l7tYA91QMfJxl5-F9f04L", basePrice: 2 },
-      { id: 23, name: "Prarambh Chaturvedi", role: "Batter", photo: "https://drive.google.com/open?id=11TFLiG1QH5XIMT0J-bNoGqc1y37VyQuv", basePrice: 2 },
-      { id: 24, name: "Kathleen Amanda", role: "Allrounder", photo: "https://drive.google.com/open?id=1VRMr7Rwjcv9sHJNrG0Pf4bhTgmXA7sMU", basePrice: 2 },
-      { id: 25, name: "Satyam", role: "Batter", photo: "https://drive.google.com/open?id=1Mkp0dNSYAbLh81-VR6UEtml3O4PpV0HR", basePrice: 2 },
-      { id: 26, name: "Arunava Giri", role: "Allrounder", photo: "https://drive.google.com/open?id=1qBnkgie9HXC369SasGeXRVPW81TnGHcX", basePrice: 2 },
-      { id: 27, name: "Rishav hisariya", role: "Batter", photo: "https://drive.google.com/open?id=13rXh1h6LNC6-NiO0S9-WwimLx0eELsAI", basePrice: 2 },
-      { id: 28, name: "Nihar sonowal", role: "Batter", photo: "https://drive.google.com/open?id=1cs48ysWFJ4n0QCi5fOPUytmI3sdDFM4V", basePrice: 2 }
+    // Fisher-Yates shuffle algorithm to randomize player order
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // CLEAN PLAYER DATA PARSED FROM FINAL SHEET
+    const RAW_PLAYERS = [
+      { id: 1, name: "Arunava Giri", role: "Allrounder", photo: "https://drive.google.com/open?id=1qBnkgie9HXC369SasGeXRVPW81TnGHcX", basePrice: 2 },
+      { id: 2, name: "Hardik gaba", role: "Batter", photo: "https://drive.google.com/open?id=1wyvp_DouU_CHJFwfCp5QGvZCtjmwLVDx", basePrice: 2 },
+      { id: 3, name: "Md Refatullah", role: "Allrounder", photo: "https://drive.google.com/open?id=1U2u_iAV3Td6cc-2M0glQWWBUnF2S3QO5", basePrice: 2 },
+      { id: 4, name: "Priyanshu Saran", role: "Allrounder", photo: "https://drive.google.com/open?id=1NgS1eaMFAD-l7tYA91QMfJxl5-F9f04L", basePrice: 2 },
+      { id: 5, name: "Prarambh Chaturvedi", role: "Batter", photo: "https://drive.google.com/open?id=11TFLiG1QH5XIMT0J-bNoGqc1y37VyQuv", basePrice: 2 },
+      { id: 6, name: "Esha Srivastava", role: "Allrounder", photo: "https://drive.google.com/open?id=1te3dRPeENZggWlO8j5sXAE2wD8GYKbOw", basePrice: 2 },
+      { id: 7, name: "KS Sharvani", role: "Batter", photo: "https://drive.google.com/open?id=1J7Bn6XM92sCq5WjcsV1lsEk18nJWFZD_", basePrice: 2 },
+      { id: 8, name: "Pragya Sharma", role: "Allrounder", photo: "https://drive.google.com/open?id=1M1qJ7inp4S-XISXyrTfBkucZsd2eDmE8", basePrice: 2 },
+      { id: 9, name: "Varsha HM", role: "Bowler", photo: "https://drive.google.com/open?id=1OMDuiwMeis3MJOZZSJ9mzxCK7IXt0q6z", basePrice: 2 },
+      { id: 10, name: "Anshika trivedi", role: "Batter", photo: "https://drive.google.com/open?id=1cpnBendSxmZnVJ4zqc--zCfYqSVRfcGG", basePrice: 2 },
+      { id: 11, name: "Intekhab", role: "Allrounder", photo: "https://drive.google.com/open?id=1HnFxNymxaIet1cz_3F4FG4TAiFEAU0WK", basePrice: 2 },
+      { id: 12, name: "Saanvi Taneja", role: "Allrounder", photo: "https://drive.google.com/open?id=1mRREE4mxv9A0n070V34n-CWAU39WXZmK", basePrice: 2 },
+      { id: 13, name: "Vipanshi Agarwal", role: "Batter", photo: "https://drive.google.com/open?id=1ogUKxbQ_0VgN5nsutMygHLKM-jI64Ikb", basePrice: 2 },
+      { id: 14, name: "Rishu kumar", role: "Batter", photo: "https://drive.google.com/open?id=15lYHfG1MirLcp2rkEYNpeXlUlgrVtgFz", basePrice: 2 },
+      { id: 15, name: "Arnesh Saha", role: "Allrounder", photo: "https://drive.google.com/open?id=1zMW4uCnzyFXsePi4h3ELJ46UjmUwGM-l", basePrice: 2 },
+      { id: 16, name: "Sanket Jana", role: "Batter", photo: "https://drive.google.com/open?id=1ndBZ7Jph_Ke7xy448h9l6vuzxQfyPxQt", basePrice: 2 },
+      { id: 17, name: "Sayan Roy", role: "Allrounder", photo: "https://drive.google.com/open?id=1NYYtuNlr3L9L-VfFlZLATRk5egx1LsD0", basePrice: 2 },
+      { id: 18, name: "Vishnu priya", role: "Allrounder", photo: "https://drive.google.com/open?id=1gc-s7ZxNnj7HuykYdGZ72ZLRzn1MPuZn", basePrice: 2 },
+      { id: 19, name: "Kathleen Amanda", role: "Allrounder", photo: "https://drive.google.com/open?id=1VRMr7Rwjcv9sHJNrG0Pf4bhTgmXA7sMU", basePrice: 2 },
+      { id: 20, name: "Satyam", role: "Batter", photo: "https://drive.google.com/open?id=1Mkp0dNSYAbLh81-VR6UEtml3O4PpV0HR", basePrice: 2 },
+      { id: 21, name: "Rishav hisariya", role: "Batter", photo: "https://drive.google.com/open?id=13rXh1h6LNC6-NiO0S9-WwimLx0eELsAI", basePrice: 2 }
     ];
 
     function getDefaultState() {
       const now = Date.now();
+      // Generates randomized lot sequence
+      const randomizedRoster = shuffleArray(RAW_PLAYERS);
+
       return {
         currentLotIndex: 0,
         currentBid: 2,
@@ -655,10 +668,10 @@
         timerEndsAt: now + 20000,
         timerIsPaused: false,
         timerRemainingPaused: 20000,
-        players: INITIAL_PLAYERS,
+        players: randomizedRoster,
         teams: {
-          team1: { name: "Royal Challenger Retainers", captain: "Abhigyan Prakash", purse: 100, squad: [] },
-          team2: { name: "Crown Crushers", captain: "Mourya Podapati", purse: 100, squad: [] },
+          team1: { name: "Royal Challenger Retainers", captain: "Mourya Podapati", purse: 100, squad: [] },
+          team2: { name: "Crown Crushers", captain: "Abhigyan Prakash", purse: 100, squad: [] },
           team3: { name: "Enamel Warriors", captain: "Sayan Biswas", purse: 100, squad: [] }
         },
         logs: ["Arena initialized. Blitz Lite rules briefing active."]
@@ -1009,7 +1022,7 @@
     function handleCommenceUnsoldRound() {
       if (currentRole !== 'admin' || !appState) return;
       
-      appState.players = (appState.unsoldPool || []).map(p => ({
+      appState.players = shuffleArray(appState.unsoldPool || []).map(p => ({
         ...p,
         basePrice: 1
       }));
@@ -1036,12 +1049,10 @@
         return;
       }
 
-      // Determine which team draws next based on smallest squad size
       const teamsArr = ['team1', 'team2', 'team3'];
       teamsArr.sort((a, b) => (appState.teams[a].squad.length || 0) - (appState.teams[b].squad.length || 0));
       const targetTeamKey = teamsArr[0];
 
-      // Draw random chit
       const randIdx = Math.floor(Math.random() * appState.chitPool.length);
       const chosenPlayer = appState.chitPool.splice(randIdx, 1)[0];
 
@@ -1060,7 +1071,6 @@
         teamName: appState.teams[targetTeamKey].name
       };
 
-      // Set up next team in turn
       const nextTeamsArr = ['team1', 'team2', 'team3'];
       nextTeamsArr.sort((a, b) => (appState.teams[a].squad.length || 0) - (appState.teams[b].squad.length || 0));
       appState.chitTurnTeamKey = nextTeamsArr[0];
@@ -1085,7 +1095,7 @@
     }
 
     function resetAuction() {
-      if (confirm("Reset the entire Blitz Lite auction? State will return to the pre-auction briefing.")) {
+      if (confirm("Reset the entire Blitz Lite auction? State will re-shuffle and return to the pre-auction briefing.")) {
         hasCelebratedFinale = false;
         auctionRef.set(getDefaultState());
       }
@@ -1354,7 +1364,7 @@
       document.getElementById('playerBasePrice').textContent = `${isRound2 ? 1 : 2} Pts`;
       document.getElementById('playerCurrentBid').textContent = `${appState.currentBid} Pts`;
 
-      // Direct Streaming Image Update
+      // Direct Streaming Image Update with Zoomed Framing
       const imgEl = document.getElementById('playerPhotoImg');
       const placeholderEl = document.getElementById('photoPlaceholderIcon');
 
